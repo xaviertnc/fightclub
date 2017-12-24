@@ -158,6 +158,4 @@ FC.game.player = new Player ('player'    , { x: 150, y: 250, height: 64, width: 
 document.addEventListener('keydown' , FC.game.keydown.bind(FC.game));
 document.addEventListener('keyup'   , FC.game.keyup.bind(FC.game));
 
-console.log('Ready... Fight!');
-
 FC.game.start();

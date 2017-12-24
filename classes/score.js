@@ -11,8 +11,6 @@ class Score extends Sprite {
 
   constructor(id, props) {
 
-    console.log('Score.props =', props);
-
     super(id);
 
     this.value = 0;
@@ -20,7 +18,7 @@ class Score extends Sprite {
 
     FC.lib.extend(this, props);
 
-    console.log('Score.this.instance =', this);
+    console.log('Score.instance =', this);
 
   }
 

@@ -13,11 +13,11 @@ class Boss extends Npc {
 
     super(id);
 
-    console.log('Boss.props =', props);
-
     this.health = 100;
     this.classStr = 'boss1';
-    
+
+    FC.lib.extend(this, props);
+
     this.healthBar = new HealthBar(id + '-health-bar',
     {
       x      : props.x,
@@ -26,9 +26,7 @@ class Boss extends Npc {
       height : 10
     });
 
-    FC.lib.extend(this, props);
-
-    console.log('Boss.this.instance =', this);
+    console.log('Boss.instance =', this);
 
   }
 

@@ -11,9 +11,7 @@ class Player extends Sprite {
 
   constructor(id, props) {
 
-    super(id, props);
-
-    console.log('Player.props =', props);
+    super(id);
 
     this.bullets = [];
     this.lastAttack = 0;
@@ -21,7 +19,7 @@ class Player extends Sprite {
 
     FC.lib.extend(this, props);
 
-    console.log('Player.this.instance =', this);
+    console.log('Player.instance =', this);
 
   }
 

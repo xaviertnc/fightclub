@@ -15,7 +15,7 @@ class Npc extends Sprite {
     
     FC.lib.extend(this, props);
 
-    console.log('NPC.this.instance =', this);
+    if (props) { console.log('NPC.instance =', this); }
 
   }
 

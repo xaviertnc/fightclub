@@ -11,16 +11,14 @@ class HealthBar extends Sprite {
 
   constructor(id, props) {
 
-    super(id, props);
-
-    console.log('HBar.props =', props);
+    super(id);
 
     this.value = 100;
     this.classStr = 'health-bar';
 
     FC.lib.extend(this, props);
 
-    console.log('HBar.this.instance =', this);
+    console.log('HBar.instance =', this);
 
   }
 

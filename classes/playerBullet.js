@@ -14,15 +14,13 @@ class PlayerBullet extends Sprite {
 
     super(id);
 
-    console.log('PlayerBullet.props =', props);
-
     this.hitScore = 100;
     this.healthDamage = 5;
     this.classStr = 'player-bullet';
 
     FC.lib.extend(this, props);
 
-    console.log('PlayerBullet.this.instance =', this);
+    console.log('PlayerBullet.instance =', this);
 
   }
 

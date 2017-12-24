@@ -21,12 +21,6 @@ class Sprite extends Entity {
     this.lastUpdateTime = 0;   // unix time
     this.lastMoveTime = 0;     // unix time
 
-    console.log('SPR.this.default =', this);
-
-    FC.lib.extend(this, props);
-
-    console.log('SPR.this.instance =', this);
-
     this.elm = document.getElementById(id);
 
     if ( ! this.elm) {
@@ -34,6 +28,10 @@ class Sprite extends Entity {
       FC.game.addSprite(this.elm);
       //this.update();
     }
+
+    FC.lib.extend(this, props);
+
+    if (props) { console.log('SPR.instance =', this); }
 
   }
 

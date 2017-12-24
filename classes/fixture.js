@@ -7,16 +7,16 @@
  *
  */
 
-FC.Fixture = function (id, props) {
+class Fixture extends Sprite {
 
-  console.log('Fixture.props =', props);
+  constructor(id, props) {
 
-  FC.lib.extend(this, new FC.Sprite(id));
+    super(id);
 
-  //console.log('Fixture.this.inherit =', this);
+    FC.lib.extend(this, props);
 
-  FC.lib.extend(this, props);
+    if (props) { console.log('Fixture.instance =', this); }
 
-  console.log('Fixture.this.instance =', this);
+  }
 
-};
+} // end: Fixture class

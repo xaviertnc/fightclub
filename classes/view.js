@@ -19,7 +19,9 @@ class View {
     this.elm.style = 'height:' + this.height + 'px; width:' + this.width + 'px';
 
     FC.lib.extend(this, props);
-    
+
+    console.log('View.instance =', this);
+
   }
 
 }
