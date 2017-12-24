@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Fight Club</title>
+    <link href="favicon.ico" rel="shortcut icon">
+    <link rel="stylesheet" href="style.css"/>
+  </head>
+
+  <body>
+
+    <div id="page">
+
+      <h1>Welcome to Fight Club</h1>
+
+      <div id="main-view"></div>
+
+      <div class="actionbar">
+        <button id="start" onclick="FC.game.start()" type="button" >Start</button>&nbsp;&nbsp;
+        <button id="stop"  onclick="FC.game.stop()"  type="button" disabled>Stop</button>
+      </div>
+
+    </div>
+
+    <script src="lib.js"></script>
+    <script src="objects/view.js"></script>
+    <script src="objects/entity.js"></script>
+    <script src="objects/sprite.js"></script>
+    <script src="objects/fixture.js"></script>
+    <script src="objects/score.js"></script>
+    <script src="objects/healthbar.js"></script>
+    <script src="objects/player.js"></script>
+    <script src="objects/playerBullet.js"></script>
+    <script src="objects/npc.js"></script>
+    <script src="objects/boss.js"></script>
+    <script src="game.js"></script>
+
+  </body>
+
+</html>

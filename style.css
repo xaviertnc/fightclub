@@ -1,0 +1,55 @@
+#page {
+    margin: 1em auto;
+    max-width: 800px;
+}
+
+#main-view {
+    border: 1px solid blue;
+    position: relative;
+}
+
+#player {
+    background: url('img/player001.png') no-repeat;
+    /*border: 1px solid green;*/
+    position: absolute;
+    z-index: 100;
+}
+
+#boss1 {
+    background: url('img/boss003.png') no-repeat;
+    /*border: 1px solid crimson;*/
+    position: absolute;
+    z-index: 100;
+}
+
+.score {
+    font-size: 1.34em;
+    padding: 0.5em;
+}
+
+.health-bar {
+    background-color: crimson;
+    position: absolute;
+    z-index: 150;
+}
+
+.health-bar-inner {
+    background-color: lime;
+    display: block;
+    font-size: 0.5em;
+    height: 100%
+}
+
+.player-bullet {
+    background: url('img/bullet004.png') no-repeat;
+    position: absolute;
+    z-index: 200;    
+}
+
+.actionbar {
+    padding: 1em 0;
+}
+
+.explode {
+    background-color: red;
+}
