@@ -16,7 +16,7 @@
 }
 
 #boss1 {
-    background: url('img/boss003.png') no-repeat;
+    background: url('img/boss001.png') no-repeat;
     /*border: 1px solid crimson;*/
     position: absolute;
     z-index: 100;
@@ -43,7 +43,7 @@
 .player-bullet {
     background: url('img/bullet004.png') no-repeat;
     position: absolute;
-    z-index: 200;    
+    z-index: 200;
 }
 
 .actionbar {
