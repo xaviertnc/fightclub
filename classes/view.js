@@ -7,17 +7,19 @@
  *
  */
 
-FC.View = function (id, props) {
+class View {
+
+  constructor(id, props) {
 
     this.id = id;
-
     this.elm = document.getElementById(id);
-
     this.width = props.width ? props.width : 800;
     this.height = props.height ? props.height : 600;
 
     this.elm.style = 'height:' + this.height + 'px; width:' + this.width + 'px';
 
     FC.lib.extend(this, props);
+    
+  }
 
-};
+}

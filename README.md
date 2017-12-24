@@ -1,85 +1,83 @@
 #PLAYER
- - Health
+- Health
 
- - CharacterClass
-    - Warrior
-    - Knight
-    - Barbarian
-    - Fury
-    - Shadow
-    - Mage
-    - Druid
-    - Peasant
+- Character Class
+  - Warrior
+  - Knight
+  - Barbarian
+  - Fury
+  - Shadow
+  - Mage
+  - Druid
+  - Peasant
 
- - Talents
-    - Archery
-    - Axe
-    - Spear
-    - Sword
-    - Alchemy
-    - Traps
-    - Fire Magic
-    - Water Magic
-    - Air Magic
-    - Earth Magic
-    - Light Magic
-    - Dark Magic
+- Talents
+  - Archery
+  - Axe
+  - Spear
+  - Sword
+  - Alchemy
+  - Traps
+  - Fire Magic
+  - Water Magic
+  - Air Magic
+  - Earth Magic
+  - Light Magic
+  - Dark Magic
 
- - Skills
-    - Archery
-      - Multi shot
-      - Long shot
-    - Axe
-      - Double swing
-      - Round about
-    - Spear
-      - Stab
-      - Throw
-    - Alchemy
-      - Poison
-      -
-
-
- - Items / Equipment
+- Skills
+  - Archery
+    - Multi shot
+    - Long shot
+  - Axe
+    - Double swing
+    - Round about
+  - Spear
+    - Stab
+    - Throw
+  - Alchemy
+    - Poison
 
 
- - Inventory
+- Items / Equipment
 
 
- - Actions
+- Inventory
 
 
- - Attacks
-    - Attack
-      - Damanges
-         - Fire -> Fn(r,t,skills,level)
-         - Water
-         - Earth
-         - Air
-         - Light
-         - Darkness
-         - Slash
-         - Bash
-         - Pierce
-         - Poison
-      - Duration (seconds)
-      - Radius (pixles)
+- Actions
 
 
- - Defences
-    - Defence
-         - Fire -> c + Fn(t)
-         - Water
-         - Earth
-         - Air
-         - Light
-         - Darkness
-         - Slash
-         - Bash
-         - Pierce
-         - Poison
-      - Duration (seconds)
+- Attacks
+- Attack
+  - Damages
+     - Fire => Fn(r,t,skills,level)
+     - Water
+     - Earth
+     - Air
+     - Light
+     - Darkness
+     - Slash
+     - Bash
+     - Pierce
+     - Poison
+  - Duration (seconds)
+  - Radius (pixels)
 
+
+- Defenses
+- Defense
+    - Fire -> c + Fn(t)
+    - Water
+    - Earth
+    - Air
+    - Light
+    - Darkness
+    - Slash
+    - Bash
+    - Pierce
+    - Poison
+ - Duration (seconds)
 
 
 #NPC

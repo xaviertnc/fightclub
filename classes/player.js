@@ -7,37 +7,37 @@
  *
  */
 
-FC.Player = function (id, props) {
+class Player extends Sprite {
 
-  console.log('Player.props =', props);
+  constructor(id, props) {
 
-  FC.lib.extend(this, new FC.Sprite(id));
+    super(id, props);
 
-  //console.log('Player.this.inherit =', this);
+    console.log('Player.props =', props);
 
-  this.bullets = [];
-  this.classStr = 'player';
-  this.lastAttack = 0;
+    this.bullets = [];
+    this.lastAttack = 0;
+    this.classStr = 'player';
 
-  //console.log('Player.this.default =', this);
+    FC.lib.extend(this, props);
 
-  FC.lib.extend(this, props);
+    console.log('Player.this.instance =', this);
 
-  console.log('Player.this.instance =', this);
+  }
 
 
-  this.render = function (time, dStartTime, ticks) {
-    FC.Sprite.prototype.render.call(this, time, dStartTime, ticks);
+  render(time, dStartTime, ticks) {
+    super.render(time, dStartTime, ticks);
     //this.elm.innerHTML = ticks.toString();
-  };
+  }
 
 
-  this.update = function (time, dStartTime, ticks) {
+  update(time, dStartTime, ticks) {
 
     var dt, dx, dy;
 
     // Get Class + Style
-    FC.Sprite.prototype.update.call(this, time, dStartTime, ticks);
+    super.update(time, dStartTime, ticks);
 
     if ( ! this.lastUpdateTime) { this.lastUpdateTime = time; }
 
@@ -99,7 +99,7 @@ FC.Player = function (id, props) {
 
           this.lastAttack = time;
 
-          let bullet = new FC.PlayerBullet('pb'+(FC.nextId++), {
+          let bullet = new PlayerBullet('pb'+(FC.nextId++), {
               state: 'active',
               x: this.x + this.width,
               y: this.y + (this.height / 2) - 16,
@@ -145,6 +145,7 @@ FC.Player = function (id, props) {
         return !destroy;
     });
 
-  }; // end: FC.player.update
+  } // end: player.update
+  
 
-};
+} // end: Player class
