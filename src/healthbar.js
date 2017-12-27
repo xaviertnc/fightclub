@@ -14,7 +14,7 @@ class HealthBar extends Sprite {
     super(id);
 
     this.value = 100;
-    this.classStr = 'health-bar';
+    this.className = 'health-bar';
 
     FC.lib.extend(this, props);
 
@@ -23,21 +23,11 @@ class HealthBar extends Sprite {
   }
 
 
-  render(time, dStartTime, ticks) {
+  render(now) {
 
-    super.render(time, dStartTime, ticks);
-
+    super.render(now); // Render Class + Style
     this.elm.innerHTML = '<small class="health-bar-inner" style="width:' + this.value + '%">' + this.value + '</small>';
 
   }
-
-
-  update(time, dStartTime, ticks) {
-
-    // Get Class + Style
-    super.update(time, dStartTime, ticks);
-
-  }
-
 
 } // end: HealthBar class

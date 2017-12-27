@@ -12,7 +12,9 @@ class View {
   constructor(id, props) {
 
     this.id = id;
+
     this.elm = document.getElementById(id);
+
     this.width = props.width ? props.width : 800;
     this.height = props.height ? props.height : 600;
 

@@ -3,7 +3,7 @@
 class Lib {
 
   extend(obj, extendWith) {
-    
+
     if ( ! extendWith) { return; }
 
     for (var prop in extendWith) {
@@ -38,6 +38,27 @@ class Lib {
   }
 
 
+  approach(val, limit, increment, touchLimit) {
+
+    let dV = val - limit;
+
+    //console.log('Approach val:', val, ', limit:', limit, ', inc:', increment, ', dV:', dV);
+
+    if (dV > 0) {
+
+      if (dV > increment) { return val - increment; }
+
+    } else {
+
+      if (-dV > increment) { return val + increment; }
+
+    }
+
+    return touchLimit ? limit : val;
+
+  }
+ 
+
   intersectRect(r1, r2) {
 
     return !(r2.x > (r1.x+r1.width) || (r2.x+r2.width) < r1.x ||
@@ -46,7 +67,18 @@ class Lib {
   }
 
 
+  getAngle(x1, y1, x2, y2) {
+
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+
+    return (Math.atan2(dx,  dy) / Math.PI) * 180;
+
+  }
+
+
   // Get the best timestamp depending on browser capabilities!
+
   getTime() {
 
     if(window.performance.now) {
@@ -130,6 +162,8 @@ class Lib {
   }
 
 
+  // jQuery-like DOM Element class manipulation functions...
+
   getClass(elm) {
 
     return (elm.getAttribute && elm.getAttribute('class')) || '';
@@ -191,8 +225,11 @@ class Lib {
 
 
 
-if ( ! Array.prototype.indexOf) //IE8 does not support "indexOf"
-{
+// ----------------
+// Custom Polyfills
+// ----------------
+
+if ( ! Array.prototype.indexOf) { //IE8 does not support "indexOf"
 
   Array.prototype.indexOf = function(obj, start)
   {
@@ -202,5 +239,20 @@ if ( ! Array.prototype.indexOf) //IE8 does not support "indexOf"
      }
      return -1;
   };
+
+}
+
+
+if ( ! Array.prototype.includes) {
+
+  Array.prototype.includes = function(value) {
+
+    for (var i = 0, n = this.length; i < n; i++) {
+
+      if (value === this[i]) { return true; }
+
+    }
+
+  }
 
 }

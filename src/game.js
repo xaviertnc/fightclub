@@ -9,15 +9,14 @@
 
 FC.game = {
 
-  fps         : 60,
-  timer       : null,
+  fps         : 62,
+  view        : null,
   state       : null,
+  input       : null,
   score       : null,
   enemy       : null,
   player      : null,
-  view        : null,
-  keysDown    : {},
-  keysPressed : {},
+  stepTimer   : null,
   startTime   : 0,
   ticks       : 0,
 
@@ -37,35 +36,7 @@ FC.game = {
 
   addSprite: function (elm) {
 
-    this.view.elm.appendChild(elm);
-
-  },
-
-
-  keydown: function(event) {
-
-    //console.log('FC.game.keydown()');
-    var keycode = (event.keyCode ? event.keyCode : event.which);
-
-    // Clear state when we release the key.
-    this.keysDown[keycode] = true;
-
-    // Only clear state once we get time to check on its state.
-    this.keysPressed[keycode] = true;
-
-    event.preventDefault();
-
-  },
-
-
-  keyup: function(event) {
-
-    //console.log('FC.game.keyup()');
-    var keycode = (event.keyCode ? event.keyCode : event.which);
-
-    delete this.keysDown[keycode];
-
-    event.preventDefault();
+    FC.view.elm.appendChild(elm);
 
   },
 
@@ -80,45 +51,76 @@ FC.game = {
     startBtn.disabled = true;
     stopBtn.disabled = false;
 
-    this.state = 'running';
+    this.state = 'Running';
 
-    window.clearTimeout(this.timer);
+    window.clearTimeout(this.stepTimer);
 
-    this.timer = window.setTimeout(this.animate.bind(this), (1000 / this.fps));
-
-  },
-
-
-  update: function (time, dStartTime) {
-
-    this.player.update(time, dStartTime, this.ticks);
-    this.enemy.update(time, dStartTime, this.ticks);
-    this.score.update(time, dStartTime, this.ticks);
-
-    this.keysPressed = {};
+    this.stepTimer = window.setTimeout(this.step.bind(this), (1000 / this.fps));
 
   },
 
 
-  animate: function() {
+  startUpdate: function(now) {
+
+    this.score.startUpdate(now);
+    this.player.startUpdate(now);
+    this.enemy.startUpdate(now);
+
+  },
+
+
+  update: function (now) {
+
+    FC.input.update();
+
+    this.score.update(now);
+    this.player.update(now);
+    this.enemy.update(now);
+
+  },
+
+
+  endUpdate: function(now) {
+
+    this.score.endUpdate(now);
+    this.player.endUpdate(now);
+    this.enemy.endUpdate(now);
+
+  },
+
+
+  render: function() {
+
+    this.score.render();
+    this.player.render();
+    this.enemy.render();
+
+  },
+
+
+  step: function() {
+
+    let now = FC.lib.getTime();
+
+    if ( ! this.startTime) {
+
+      this.startTime = now;
+
+    }
+
+    this.startUpdate(now);
+
+    this.update(now);
+
+    this.endUpdate(now);
+
+    this.render();
 
     this.ticks++;
 
-    var time, dStartTime;
+    if (this.state === 'Running') {
 
-    time = FC.lib.getTime();
-
-    if( ! this.startTime) { this.startTime = time; }
-
-    dStartTime = time - this.startTime;
-
-    //console.log('FC.game.animate(), this =', this);
-
-    this.update(time, dStartTime);
-
-    if (this.state === 'running') {
-
-      this.timer = window.setTimeout(this.animate.bind(this), (1000 / this.fps));
+      this.stepTimer = window.setTimeout(this.step.bind(this), (1000 / this.fps));
 
     }
 
@@ -127,7 +129,7 @@ FC.game = {
 
   stop: function () {
 
-    window.clearTimeout(FC.game.timer);
+    window.clearTimeout(this.stepTimer);
 
     let startBtn = document.getElementById('start');
     let stopBtn  = document.getElementById('stop');
@@ -135,7 +137,7 @@ FC.game = {
     startBtn.disabled = false;
     stopBtn.disabled = true;
 
-    this.state = 'idle';
+    this.state = 'Idle';
 
   }
 

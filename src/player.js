@@ -15,135 +15,149 @@ class Player extends Sprite {
 
     this.bullets = [];
     this.lastAttack = 0;
-    this.classStr = 'player';
+    this.className = 'wizzard';
 
     FC.lib.extend(this, props);
+
+    // Sprite::render() uses the animator if available
+    this.animator = new Animator(this);
 
     console.log('Player.instance =', this);
 
   }
 
 
-  render(time, dStartTime, ticks) {
-    super.render(time, dStartTime, ticks);
-    //this.elm.innerHTML = ticks.toString();
+  _dx(dt) {
+
+    return ((this.horzSpeed * dt) / 100)|0;
+
   }
 
 
-  update(time, dStartTime, ticks) {
+  _dy(dt) {
 
-    var dt, dx, dy;
+    return ((this.vertSpeed * dt) / 100)|0;
 
-    // Get Class + Style
-    super.update(time, dStartTime, ticks);
+  }
 
-    if ( ! this.lastUpdateTime) { this.lastUpdateTime = time; }
 
-    dt = time - this.lastUpdateTime; // milliseconds
+  _fireBullet(now) {
 
-    this.lastUpdateTime = time;
+      // Rate and quantity limit attacks...
+      if (this.bullets.length < 10 && (now - this.lastAttack > 100)) {
 
-    if (dt > 0) {
+        this.lastAttack = now;
 
-      this.lastMoveTime = time;
+        let bullet = new PlayerBullet('pb'+(FC.nextId++), {
+            state: 'Live',
+            x: this.x + this.width,
+            y: this.y + ((this.height / 2)|0) - 16,
+            width:16,
+            height:16,
+            vertSpeed:0,
+            horzSpeed:56
+        });
 
-      // GO UP: Up Arrow
-      if (38 in FC.game.keysDown) {
-
-        dy = (this.vertSpeed * dt) / 100;
-
-        if ((this.y - dy) > 0) {
-          this.y -= dy;
-        }
-
-      }
-
-      // GO DOWN: Down Arrow
-      if (40 in FC.game.keysDown) {
-        // dy = pixels to move based on the time span from
-        // previous move and given this.hs in "pixels/sec"
-        dy = (this.vertSpeed * dt) / 100;
-        if ((this.y + dy) <= (FC.game.view.height - this.height)) {
-          this.y += dy;
-        }
-      }
-
-      // GO RIGHT: Right Arrow
-      if (39 in FC.game.keysDown) {
-
-        dx = (this.horzSpeed * dt) / 100;
-
-        if ((this.x + dx) <= (FC.game.view.width - this.width)) {
-          this.x += dx;
-        }
+        this.bullets.push(bullet);
 
       }
 
-      // GO LEFT: Left Arrow
-      if (37 in FC.game.keysDown) {
+  }
 
-        dx = (this.horzSpeed * dt) / 100;
 
-        if ((this.x - dx) > 0) {
-          this.x -= dx;
-        }
+  _updateBullets(now) {
 
-      }
+    let game = FC.game;
 
-      // FIRE: Left-Ctrl
-      if (17 in FC.game.keysDown) {
+    // Update LIVE bullets
+    this.bullets.forEach(function(bullet) {
 
-        if (this.bullets.length < 10 && (time - this.lastAttack > 100)) {
+      bullet.startUpdate(now);
 
-          this.lastAttack = time;
+      bullet.update(now); // Update mainly position x,y
 
-          let bullet = new PlayerBullet('pb'+(FC.nextId++), {
-              state: 'active',
-              x: this.x + this.width,
-              y: this.y + (this.height / 2) - 16,
-              width:16,
-              height:16,
-              vertSpeed:0,
-              horzSpeed:30
-          });
+      bullet.endUpdate(now);
 
-          this.bullets.push(bullet);
+      if (bullet.state === 'Live' && bullet.detectCollision(game.enemy)) {
 
-        }
-
-      }
-
-    }
-
-    var index = null;
-
-    // Update active bullets
-    for (index in this.bullets) {
-
-      let bullet = this.bullets[index];
-
-      bullet.update(time, dStartTime, ticks);
-
-      if (bullet.state === 'active' && bullet.detectCollision(FC.game.enemy)) {
-
-        FC.game.score.value += bullet.hitScore;
-        FC.game.enemy.takeHit(bullet);
-        bullet.state = 'explode';
+        game.score.value += bullet.hitScore;
+        game.enemy.takeHit(bullet);
+        bullet.state = 'Impacting';
         bullet.horzSpeed = 0;
 
-        window.setTimeout(function () { bullet.state = 'destroy'; }, 200);
+        window.setTimeout(function () { bullet.state = 'Used'; }, 300);
 
       }
-    }
 
-    // Remove destoryed bullets;
-    this.bullets = this.bullets.filter(function(bullet) {
-        let destroy =  bullet.state === 'destroy';
-        if (destroy) { bullet.elm.remove(); }
-        return !destroy;
     });
 
+    // Remove USED bullets;
+    this.bullets = this.bullets.filter(function(bullet) {
+      if (bullet.state === 'Used') {
+
+        // Remove bullet
+        bullet.elm.remove();
+        return 0;
+
+      }
+
+      // Keep bullet
+      return 1;
+
+    });
+
+  }
+
+
+  _renderBullets() {
+
+    this.bullets.forEach(function(bullet) { bullet.render(); });
+
+  }
+
+
+  update(now) {
+
+    if ( ! this.lastUpdateTime) { this.lastUpdateTime = now; }
+    let dt = now - this.lastUpdateTime; // milliseconds
+    this.lastUpdateTime = now;
+
+    if (dt >= 14) { // Rate limit updates to 14ms per update or max. 71 fps
+
+      if (FC.input.directionChanged) {
+
+        this.animator.currentAnimation = this.animator.getAnimationFacing(FC.input.direction);
+
+      }
+
+      if (FC.input.directions.includes("Up"))    { this.y = FC.lib.approach(this.y, 0, this._dy(dt)); }
+      if (FC.input.directions.includes("Down"))  { this.y = FC.lib.approach(this.y, FC.view.height - this.height, this._dy(dt)); }
+      if (FC.input.directions.includes("Left"))  { this.x = FC.lib.approach(this.x, 0, this._dx(dt)); }
+      if (FC.input.directions.includes("Right")) { this.x = FC.lib.approach(this.x, FC.view.width - this.width, this._dy(dt)); }
+
+      let action = FC.input.action;
+
+      if (action === "Attack") {
+
+        this._fireBullet(now);
+
+      }
+
+      this._updateBullets(now);
+
+    }
+
+    super.update(now); // Render Class + Style
+
   } // end: player.update
-  
+
+
+  render() {
+
+    super.render();
+    this._renderBullets();
+
+  } // end: player.render
+
 
 } // end: Player class

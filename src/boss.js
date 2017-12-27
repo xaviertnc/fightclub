@@ -14,7 +14,7 @@ class Boss extends Npc {
     super(id);
 
     this.health = 100;
-    this.classStr = 'boss1';
+    this.className = 'boss1';
 
     FC.lib.extend(this, props);
 
@@ -39,11 +39,18 @@ class Boss extends Npc {
   }
 
 
-  update(time, dStartTime, ticks) {
+  update(now) {
 
-    // Get Class + Style
-    super.update(time, dStartTime, ticks);
-    this.healthBar.update();
+    super.update(now); // Render Class + Style
+    this.healthBar.update(now);
+
+  }
+
+
+  render() {
+
+    super.render();
+    this.healthBar.render();
 
   }
 

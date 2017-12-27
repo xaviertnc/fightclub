@@ -14,7 +14,8 @@ class Score extends Sprite {
     super(id);
 
     this.value = 0;
-    this.classStr = 'score';
+    this.lastValue = 0;
+    this.className = 'score';
 
     FC.lib.extend(this, props);
 
@@ -23,18 +24,16 @@ class Score extends Sprite {
   }
 
 
-  render(time, dStartTime, ticks) {
+  render(now) {
 
-    super.render(time, dStartTime, ticks);
-    this.elm.innerHTML = 'Score: ' + this.value;
-    
-  }
+    if ((this.value !== this.lastValue) || this.firstRender) {
 
+      this.elm.innerHTML = 'Score: ' + this.value;
+      this.lastValue = this.value;
 
-  update(time, dStartTime, ticks) {
+    }
 
-      // Get Class + Style
-      super.update(time, dStartTime, ticks);
+    super.render(now); // Render Class + Style
 
   }
 

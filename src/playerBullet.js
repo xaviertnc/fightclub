@@ -16,7 +16,7 @@ class PlayerBullet extends Sprite {
 
     this.hitScore = 100;
     this.healthDamage = 5;
-    this.classStr = 'player-bullet';
+    this.className = 'player-bullet';
 
     FC.lib.extend(this, props);
 
@@ -32,38 +32,37 @@ class PlayerBullet extends Sprite {
   }
 
 
-  update(time, dStartTime, ticks) {
+  update(now) {
 
     var dt, dx;
 
-    // Get Class + Style
-    super.update(time, dStartTime, ticks);
+    if ( ! this.lastUpdateTime) { this.lastUpdateTime = now; }
 
-    if ( ! this.lastUpdateTime) { this.lastUpdateTime = time; }
+    dt = now - this.lastUpdateTime; // milliseconds
 
-    dt = time - this.lastUpdateTime; // milliseconds
+    this.lastUpdateTime = now;
 
-    this.lastUpdateTime = time;
+    if (dt > 14) {
 
-    if (dt > 0) {
+      this.lastMoveTime = now;
 
-      this.lastMoveTime = time;
+      dx = ((this.horzSpeed * dt) / 100)|0;
 
-      dx = (this.horzSpeed * dt) / 100;
+      if ((this.x + dx) <= (FC.view.width - this.width)) {
 
-      if ((this.x + dx) <= (FC.game.view.width - this.width)) {
-
-        this.x += dx;
+        this.x = this.x + dx;
 
       } else {
 
-        this.state = 'destroy';
+        this.state = 'Used';
 
       }
 
     }
 
-  } // end: playerBullet.update
+    super.update(now); // Render Class + Style
+
+  }
 
 
 } // end: PlayerBullet class
