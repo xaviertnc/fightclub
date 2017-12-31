@@ -57,12 +57,21 @@ class Lib {
     return touchLimit ? limit : val;
 
   }
- 
+
 
   intersectRect(r1, r2) {
 
-    return !(r2.x > (r1.x+r1.width) || (r2.x+r2.width) < r1.x ||
-      r2.y > (r1.y+r1.height) || (r2.y+r2.height) < r1.y);
+    return !(r2.x > (r1.x + r1.width) || (r2.x + r2.width) < r1.x ||
+      r2.y > (r1.y + r1.height) || (r2.y + r2.height) < r1.y);
+
+  }
+
+
+  outOfBounds(r1, r2) {
+
+    // r1 == Bounds Rect, r2 = Object Rect
+    return r2.x > (r1.x + r1.width - r2.width) || r2.x < r1.x ||
+      r2.y > (r1.y + r1.height - r2.height) || r2.y < r1.y;
 
   }
 
@@ -70,9 +79,50 @@ class Lib {
   getAngle(x1, y1, x2, y2) {
 
     let dx = x2 - x1;
-    let dy = y2 - y1;
+    let dy = y1 - y2;
 
-    return (Math.atan2(dx,  dy) / Math.PI) * 180;
+    let da = (Math.atan2(dy,  dx) / Math.PI) * 180;
+
+    // "da"" Range: 0 to 179.9999 (clockwise), 0 to -179.9999 (anti-clockwise)
+
+    return da < 0 ? (360 + da) : da; // +360 because y-axis is reversed on screens!
+
+  }
+
+
+  rateLimit(func, wait, immediate) {
+
+      var delayTimer;
+
+      return function() {
+
+        // If busy with delay, exit.
+        if (delayTimer) { return; }
+
+        // If it's the first call and "immediate" is set,
+        // don't wait, just run the function and exit.
+        if (immediate) {
+
+          // Note: "immediate" is persistent between calls (just like "delayTimer")
+          // and will remember its value in future calls. I.e. future calls will be delayed!
+          immediate = false;
+
+          return func.apply(context, args);
+
+        }
+
+        let context = this;
+        let args = arguments;
+
+        delayTimer = setTimeout(function() {
+
+           delayTimer = false;
+
+           func.apply(context, args);
+
+        }, wait);
+
+      };
 
   }
 
