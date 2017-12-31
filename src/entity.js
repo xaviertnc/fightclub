@@ -23,15 +23,9 @@ class Entity {
   }
 
 
-  startUpdate(now) {
+  afterUpdate(now) {
 
     this.stateChanged = (this.state !== this.lastState);
-
-  }
-
-
-  endUpdate(now) {
-
     this.lastState = this.state;
 
   }

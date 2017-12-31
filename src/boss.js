@@ -33,8 +33,16 @@ class Boss extends Npc {
 
   takeHit(objOther) {
 
-    this.healthBar.value -= objOther.healthDamage || 1;
-    if (this.healthBar.value < 0) { this.healthBar.value = 0; }
+    this.health = FC.lib.approach(this.health, 0, objOther.healthDamage || 1);
+    this.healthBar.state = this.health;
+
+  }
+
+
+  beforeUpdate(now) {
+
+    super.beforeUpdate(now);
+    this.healthBar.beforeUpdate(now);
 
   }
 
@@ -43,6 +51,14 @@ class Boss extends Npc {
 
     super.update(now); // Render Class + Style
     this.healthBar.update(now);
+
+  }
+
+
+  afterUpdate(now) {
+
+    super.afterUpdate(now);
+    this.healthBar.afterUpdate(now);
 
   }
 
