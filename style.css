@@ -4,13 +4,26 @@ body {
 }
 
 #page {
-    margin: 1em auto;
+    float: left;
     max-width: 800px;
 }
 
 #main-view {
     border: 1px solid blue;
+    height: 600px;
     position: relative;
+    width: 800px;
+}
+
+#debug-pane {
+    float: left;
+    background-color:darkslateblue;
+    border: 3px solid slateblue;
+    margin-right: 3em;
+    min-height: 270px;
+    min-width: 330px;
+    padding: 0.67em;
+    color: gold;
 }
 
 .wizzard {
@@ -40,8 +53,27 @@ body {
 .health-bar-inner {
     background-color: lime;
     display: block;
-    font-size: 0.5em;
-    height: 100%
+    font-size: 0.6em;
+    height: 100%;
+}
+
+/*
+.pointer {
+    border: 1px solid aqua;
+    position: absolute;
+    z-index: 200;
+    transform-origin: 50% 50% 0px;
+    transform: rotate(30deg);
+}
+*/
+
+.pointer-line {
+    top: 0;
+    left: 0;
+    position: absolute;
+    z-index: 50;
+    width: 800px;
+    height: 600px;
 }
 
 .player-bullet {

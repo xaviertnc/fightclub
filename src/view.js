@@ -9,21 +9,44 @@
 
 class View {
 
-  constructor(id, props) {
+  constructor(id) {
 
-    this.id = id;
+    this.id = id || 'main-view';
 
-    this.elm = document.getElementById(id);
+    this.elm = document.getElementById(this.id);
 
-    this.width = props.width ? props.width : 800;
-    this.height = props.height ? props.height : 600;
-
-    this.elm.style = 'height:' + this.height + 'px; width:' + this.width + 'px';
-
-    FC.lib.extend(this, props);
-
-    console.log('View.instance =', this);
+    console.log('View("#' + this.id +'") =', this);
 
   }
+
+
+  addElement(childElement, childTagName) {
+
+    if ( ! childElement) {
+
+      childElement = document.createElement(childTagName || 'div');
+
+    }
+
+    this.elm.appendChild(childElement);
+
+    return childElement;
+
+  }
+
+
+  getWidth() {
+
+    return this.elm.clientWidth;
+
+  }
+
+
+  getHeight() {
+
+    return this.elm.clientHeight;
+
+  }
+
 
 }
