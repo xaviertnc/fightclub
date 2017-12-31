@@ -13,8 +13,12 @@ class HealthBar extends Sprite {
 
     super(id);
 
-    this.value = 100;
+    this.state = 100;
     this.className = 'health-bar';
+    this.innerElm = document.createElement('small');
+    this.innerElm.className = 'health-bar-inner';
+    this.innerElm.style = 'width:0';
+    this.elm.appendChild(this.innerElm);
 
     FC.lib.extend(this, props);
 
@@ -23,11 +27,23 @@ class HealthBar extends Sprite {
   }
 
 
+//beforeUpdate(now) {
+//  console.log('HBAR::beforeUpdate(), stateChanged:', this.stateChanged, ', state:', this.state, ', lastState:', this.lastState);    
+//  super.beforeUpdate(now);
+//}
+
+
   render(now) {
 
-    super.render(now); // Render Class + Style
-    this.elm.innerHTML = '<small class="health-bar-inner" style="width:' + this.value + '%">' + this.value + '</small>';
+    if (this.stateChanged || this.firstRender) {
+
+      super.render(now); // Render Class + Style
+      this.innerElm.style = 'width:' + this.state + '%';
+      this.innerElm.innerText = this.state;
+
+    }
 
   }
+  
 
 } // end: HealthBar class
