@@ -42,6 +42,7 @@ class Animation {
     this.currentFrameIndex = 0;
     this.lastAnimationTime = 0;
     this.frameChanged = false;
+    this.currentFrame = undefined;
 
     FC.lib.extend(this, props);
 
@@ -56,6 +57,8 @@ class Animation {
 
     }
 
+    this.currentFrame = this.frames[this.currentFrameIndex];
+
   }
 
 }
@@ -69,6 +72,8 @@ class Animator {
     this.animations = [];
     this.currentAnimation = null;
     this.lastAnimation = null;
+
+    this.animationChanged = false;
 
     FC.lib.extend(this, props);
 
@@ -107,32 +112,25 @@ class Animator {
   }
 
 
-  update(sprite, now) {
+  update(now) {
 
     let animation = this.currentAnimation;
-
     let frame = animation.frames[animation.currentFrameIndex];
 
-    let animationChanged = (animation !== this.lastAnimation);
-
+    this.animationChanged = (animation !== this.lastAnimation);
     this.lastAnimation = animation;
-
-    sprite.bgTop = frame.top;
-    sprite.bgLeft = frame.left;
-    sprite.width = frame.width;
-    sprite.height = frame.height;
-
-    //console.log('now =', now, ', animation.lastAnimationTime =', animation.lastAnimationTime);
 
     if (animation.speed && (now - animation.lastAnimationTime > animation.speed)) {
 
       let nextFrameIndex = animation.currentFrameIndex + 1;
 
-      console.log('animation.nextFrameIndex =', nextFrameIndex);
+      //console.log('animation.nextFrameIndex =', nextFrameIndex);
 
       if (nextFrameIndex >= animation.frames.length) { nextFrameIndex = 0; }
 
       animation.lastFrameIndex = animation.currentFrameIndex;
+
+      animation.currentFrame = animation.frames[nextFrameIndex];
 
       animation.currentFrameIndex = nextFrameIndex;
 
@@ -146,18 +144,7 @@ class Animator {
 
     }
 
-    if (animationChanged || animation.frameChanged || sprite.firstRender) {
-
-      sprite.className = animation.className;
-
-      if (frame.flipH) { sprite.className += ' flipH'; }
-      if (frame.flipV) { sprite.className += ' flipV'; }
-
-      sprite.classUpdated = true;
-
-      //console.log('frame.flipH =', frame.flipH, ', sprite.id:', sprite.id, ', sprite.className:', sprite.className);
-
-    }
+    return animation;
 
   }
 
