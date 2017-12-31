@@ -19,6 +19,7 @@ class Sprite extends Entity {
     this.bgLeft = 0;
     this.width = 16;
     this.height = 16;
+    this.speed = 0;
     this.horzSpeed = 0;        // pixels per second
     this.vertSpeed = 0;        // pixels per second
     this.lastMoveTime = 0;     // unix time
@@ -28,19 +29,23 @@ class Sprite extends Entity {
     this.firstRender = true;
     this.styleParams = {};
     this.className = '';
-
-    this.elm = document.getElementById(id);
-
-    if ( ! this.elm) {
-
-      this.elm = FC.game.createSpriteElement(id);
-      FC.game.addSprite(this.elm);
-
-    }
+    this.tagName = 'div';
 
     FC.lib.extend(this, props);
 
-    if (props) { console.log('SPR.instance =', this); }
+    // Sprite Element Rules:
+    // =====================
+    // If the element already exists in the DOM, select it FIRST, then
+    // call the sprite constructor while passing the element as "props.elm".
+
+    // -- else --
+
+    // A sprite element will be created and inserted into the view element 
+    // with the tagName spesified by "this.tagName' or as a DIV by default.
+
+    this.elm = FC.view.addElement(this.elm, this.tagName);
+
+    this.elm.id = this.id;
 
   }
 
@@ -48,7 +53,15 @@ class Sprite extends Entity {
   _styleNeedsUpdate() {
 
     let sp = this.styleParams;
-    return (sp.x !== this.x || sp.y !== this.y || sp.bgTop !== this.bgTop || sp.bgLeft !== this.bgLeft);
+
+    return (
+      sp.x      !== this.x     ||
+      sp.y      !== this.y     ||
+      sp.width  !== this.width ||
+      sp.bgTop  !== this.bgTop ||
+      sp.bgLeft !== this.bgLeft
+
+    );
 
   }
 
@@ -60,6 +73,7 @@ class Sprite extends Entity {
       this.styleParams = {
         x      : this.x,
         y      : this.y,
+        width  : this.width,
         bgTop  : this.bgTop,
         bgLeft : this.bgLeft,
         width  : this.width,
@@ -77,8 +91,6 @@ class Sprite extends Entity {
 
     FC.lib.setClass(this.elm, this.className + ' ' + this.state);
 
-    this.classUpdated = false;
-
   }
 
 
@@ -89,23 +101,50 @@ class Sprite extends Entity {
 
       if (this.animator) {
 
-        styleStr += 'background-position-y:' + this.bgTop + 'px;'
-          + 'background-position-x:-' + this.bgLeft + 'px;';
+        styleStr += 'background-position:-' + this.bgLeft + 'px ' + this.bgTop + 'px;';
 
       }
 
       this.elm.style = styleStr;
 
-      this.styleUpdated = false;
-
   }
+
+
+  beforeUpdate(now) {}
 
 
   update(now) {
 
     if (this.animator) {
 
-      this.animator.update(this, now); // Affects the sprite's style params
+      let animation = this.animator.update(now);
+
+      if (animation) {
+
+        let frame = animation.currentFrame;
+
+        this.bgTop  = frame.top;
+        this.bgLeft = frame.left;
+        this.width  = frame.width;
+        this.height = frame.height;
+        
+        this.hw = (this.width / 2)|0;
+        this.hh = (this.height / 2)|0;
+
+        if (this.animator.animationChanged || animation.frameChanged || this.firstRender) {
+
+          this.className = animation.className;
+
+          if (frame.flipH) { this.className += ' flipH'; }
+          if (frame.flipV) { this.className += ' flipV'; }
+
+          this.classUpdated = true;
+
+          //console.log('frame.flipH =', frame.flipH, ', sprite.id:', this.id, ', sprite.className:', this.className);
+
+        }
+
+      }
 
     }
 
@@ -130,7 +169,8 @@ class Sprite extends Entity {
 
     }
 
-    //this._renderStyle();
+    this.classUpdated = false;
+    this.styleUpdated = false;
 
   }
 
