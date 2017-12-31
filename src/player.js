@@ -19,6 +19,9 @@ class Player extends Sprite {
 
     FC.lib.extend(this, props);
 
+    this.hw = (this.width / 2)|0;
+    this.hh = (this.height / 2)|0;
+
     // Sprite::render() uses the animator if available
     this.animator = new Animator(this);
 
@@ -48,14 +51,59 @@ class Player extends Sprite {
 
         this.lastAttack = now;
 
+        let bulletW = 16;
+        let bulletH = 16;
+        let bulletHW = bulletW/2;
+
+        let bulletX, bulletY;
+
+        let bulletDir = this.animator ? this.animator.currentAnimation.dir : 0;
+        let bulletFacing = this.animator ? this.animator.currentAnimation.facing : 'Right';
+
+        switch (bulletFacing)
+        {
+          case 'Up':
+            bulletX = this.x + this.hw - bulletHW;
+            bulletY = this.y - bulletH;
+            break;
+          case 'Down':
+            bulletX = this.x + this.hw - bulletHW;
+            bulletY = this.y + this.hh;
+            break;
+          case 'Left':
+            bulletX = this.x - bulletW;
+            bulletY = this.y + 16;
+            break;
+          case 'Right':
+            bulletX = this.x + this.width;
+            bulletY = this.y + 16;
+            break;
+          case 'UpLeft':
+            bulletX = this.x - bulletW;
+            bulletY = this.y - bulletH;
+            break;
+          case 'UpRight':
+            bulletX = this.x + this.width;
+            bulletY = this.y - bulletH;
+            break;
+          case 'DownLeft':
+            bulletX = this.x;
+            bulletY = this.y + 16;
+            break;
+          case 'DownRight':
+            bulletX = this.x;
+            bulletY = this.y + 16;
+            break;
+        }
+
         let bullet = new PlayerBullet('pb'+(FC.nextId++), {
             state: 'Live',
-            x: this.x + this.width,
-            y: this.y + ((this.height / 2)|0) - 16,
+            x: bulletX,
+            y: bulletY,
             width:16,
             height:16,
-            vertSpeed:0,
-            horzSpeed:56
+            speed:56,
+            dir: bulletDir 
         });
 
         this.bullets.push(bullet);
@@ -72,18 +120,16 @@ class Player extends Sprite {
     // Update LIVE bullets
     this.bullets.forEach(function(bullet) {
 
-      bullet.startUpdate(now);
-
       bullet.update(now); // Update mainly position x,y
 
-      bullet.endUpdate(now);
+      bullet.afterUpdate(now);
 
       if (bullet.state === 'Live' && bullet.detectCollision(game.enemy)) {
 
         game.score.value += bullet.hitScore;
         game.enemy.takeHit(bullet);
         bullet.state = 'Impacting';
-        bullet.horzSpeed = 0;
+        bullet.speed = 0;
 
         window.setTimeout(function () { bullet.state = 'Used'; }, 300);
 
@@ -91,7 +137,13 @@ class Player extends Sprite {
 
     });
 
-    // Remove USED bullets;
+  }
+
+
+  _afterUpdateBullets(now) {
+
+    // Remove USED bullets  - AND -
+    // run "AfterUpdate" on remaining LIVE bullets
     this.bullets = this.bullets.filter(function(bullet) {
       if (bullet.state === 'Used') {
 
@@ -99,9 +151,10 @@ class Player extends Sprite {
         bullet.elm.remove();
         return 0;
 
-      }
+      } 
 
       // Keep bullet
+      bullet.afterUpdate(now);
       return 1;
 
     });
@@ -131,11 +184,13 @@ class Player extends Sprite {
       }
 
       if (FC.input.directions.includes("Up"))    { this.y = FC.lib.approach(this.y, 0, this._dy(dt)); }
-      if (FC.input.directions.includes("Down"))  { this.y = FC.lib.approach(this.y, FC.view.height - this.height, this._dy(dt)); }
+      if (FC.input.directions.includes("Down"))  { this.y = FC.lib.approach(this.y, FC.view.getHeight() - this.height, this._dy(dt)); }
       if (FC.input.directions.includes("Left"))  { this.x = FC.lib.approach(this.x, 0, this._dx(dt)); }
-      if (FC.input.directions.includes("Right")) { this.x = FC.lib.approach(this.x, FC.view.width - this.width, this._dy(dt)); }
+      if (FC.input.directions.includes("Right")) { this.x = FC.lib.approach(this.x, FC.view.getWidth() - this.width, this._dx(dt)); }
+
 
       let action = FC.input.action;
+
 
       if (action === "Attack") {
 
@@ -150,6 +205,14 @@ class Player extends Sprite {
     super.update(now); // Render Class + Style
 
   } // end: player.update
+
+
+  afterUpdate(now) {
+
+    this._afterUpdateBullets(now);
+    super.afterUpdate(now);
+
+  }
 
 
   render() {
