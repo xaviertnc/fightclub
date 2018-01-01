@@ -49,4 +49,17 @@ class View {
   }
 
 
+  getX() {
+
+    return this.elm.offsetLeft;
+
+  }
+
+
+  getY() {
+
+    return this.elm.offsetTop;
+
+  }
+
 }
