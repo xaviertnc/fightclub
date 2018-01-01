@@ -11,8 +11,7 @@ class Input {
 
   constructor() {
 
-    this.lastX = 0;
-    this.lastY = 0;
+    this.mode = 'kb';
 
     this.actions = [];
     this.directions = [];
@@ -26,9 +25,9 @@ class Input {
     this.directionChanged = false;
 
     this.actionsMap = {
-      'Attack'  : [17], // Left Ctrl
-      'Exit'    : [27], // Escape
-      'Pause'   : [32]  // Space
+      'Attack'  : [17, 32], // Left Ctrl. Space
+      'Exit'    : [27],     // Escape
+      'Pause'   : [80]      // P
     };
 
     this.directionsMap = {
@@ -47,24 +46,30 @@ class Input {
 
     this.keysDown = {};
 
-    this.leftMouseDown = false;
-    this.rightMouseDown = false;
 
+    this.mdx = 0;
+    this.mdy = 0;
     this.mouseX = 0;
     this.mouseY = 0;
+    this.lastMouseX = 0;
+    this.lastMouseY = 0;
+
+    this.mouseMoved = false;
     this.mouseMoveRate = 60; // ms
 
-    this.needsUpdate = false;
+    this.leftMouseDown = false; 
+    this.rightMouseDown = false;
 
     document.addEventListener('keydown'   , this.onKeyDown.bind(this));
     document.addEventListener('keyup'     , this.onKeyUp.bind(this));
-    document.addEventListener('mouseup'   , this.onMouseUp);
-    document.addEventListener('mousedown' , this.onMouseDown);
+    document.addEventListener('mouseup'   , this.onMouseUp.bind(this));
+    document.addEventListener('mousedown' , this.onMouseDown.bind(this));
     document.addEventListener('mousemove' , FC.lib.rateLimit(this.onMouseMove.bind(this), this.mouseMoveRate));
 
+    this.inputModeView = FC.debug.addElement();
     this.mouseXYView = FC.debug.addElement();
+    this.mouseDownView = FC.debug.addElement();
     this.keysDownView = FC.debug.addElement();
-
     this.keysDirectionsView = FC.debug.addElement();
     this.keyDirectionView = FC.debug.addElement();
 
@@ -79,7 +84,7 @@ class Input {
 
     this.keysDown[keyCode] = true;
 
-    this.needsUpdate = true;
+    this.keysChanged = true;
 
     this.keysDownView.innerText = 'Keys Down: ' + JSON.stringify(this.keysDown);
 
@@ -94,37 +99,41 @@ class Input {
 
     delete this.keysDown[keyCode];
 
-    this.needsUpdate = true;
+    this.keysChanged = true;
 
-    this.keysDownView.innerText = 'Keys Down: ' + JSON.stringify(this.keysDown);  
+    this.keysDownView.innerText = 'Keys Down: ' + JSON.stringify(this.keysDown);
 
   }
 
 
   onMouseDown(event) {
 
-    console.log('FC.input.onMouseDown()');
-    event.preventDefault();
-
+    this.leftMouseDown = true;
+    this.mouseDownView.innerText = 'Mouse Down: true';
   }
 
 
   onMouseUp(event) {
 
-    console.log('FC.input.onMouseUp()');
-    event.preventDefault();
+    this.leftMouseDown = false;
+    this.mouseDownView.innerText = 'Mouse Down:';
 
   }
 
 
   onMouseMove(event) {
 
+    this.lastMouseX = this.mouseX;
+    this.lastMouseY = this.mouseY;
     this.mouseX = event.pageX;
     this.mouseY = event.pageY;
 
-    this.mouseXYView.innerText = 'MouseX: ' + this.mouseX + ', MouseY: ' + this.mouseY;
+    this.mdx = FC.input.mouseX - FC.input.lastMouseX;
+    this.mdy = FC.input.mouseY - FC.input.lastMouseY;
 
-    //console.log('FC.input.onMouseMove(), mouseXY:', this.mouseX, this.mouseY, event);
+    this.mouseMoved = true;
+
+    this.mouseXYView.innerText = 'MouseX: ' + this.mouseX + ', MouseY: ' + this.mouseY;
 
   }
 
@@ -193,14 +202,14 @@ class Input {
   }
 
 
-  update() {
+  update(now) {
 
     this.actionChanged = false;
     this.directionChanged = false;
 
-    if (this.needsUpdate) {
+    if (this.keysChanged) {
 
-      this.needsUpdate = false;
+      this.keysChanged = false;
 
       this.actions = this._mapKeysPressed(this.actionsMap);
       this.action = this.actions.length ? this.actions[0] : undefined;
@@ -212,31 +221,62 @@ class Input {
       }
 
       this.directions = this._mapKeysPressed(this.directionsMap);
-      this.direction = this.directions.length === 1 ? this.directions[0] : undefined;
 
-      if ( ! this.direction) {
+      //this.direction = this.directions.length === 1 ? this.directions[0] : undefined;
 
-        this.direction = this._getComboRequest(this.directionCombosMap, this.directions);
+      if (this.directions.length === 1) {
+
+        this.direction = this.directions[0];
+
+      } else if (this.directions.length > 1) {
+
+        let comboDirection = this._getComboRequest(this.directionCombosMap, this.directions);
+        if (comboDirection) { this.direction = comboDirection; }
 
       }
 
       if (this.direction !== this.lastDirection) {
 
+        this.mode = 'kb';
         this.directionChanged = true;
+        this.keyDirectionView.innerText = 'Direction: ' + this.direction;
+
+        console.log('INPUT UPD: Dir Changed! dir =', this.direction, ', lastDir =', this.lastDirection);
 
       }
 
       this.keysDirectionsView.innerText = 'Directions: ' + JSON.stringify(this.directions);
-      this.keyDirectionView.innerText = 'Direction: ' + this.direction;
 
     }
 
-    //if (this.action) { console.log('Input::update(), action =', this.action); }
-    //if (this.direction) { console.log('Input::update(), direction =', this.direction); }
+    if ( ! this.actionChanged) {
 
-    this.keyDown = {};
+      if (this.action === 'Attack') {
+
+           if ( ! this.leftMouseDown) { this.action = undefined; }
+
+      } else if (this.leftMouseDown) {
+
+        this.action = 'Attack';
+
+      }
+
+    }
+
+    this.inputModeView.innerText = 'Input Mode: ' + this.mode;
 
   } // end: Input::update()
+
+
+
+  afterUpdate(now) {
+
+    this.keyDown = {};
+    this.mouseMoved = false;
+    this.leftMouseDown = false;
+    this.lastDirection = this.direction;
+
+  }
 
 
 } // end: Input class
