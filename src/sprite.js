@@ -110,14 +110,11 @@ class Sprite extends Entity {
   }
 
 
-  beforeUpdate(now) {}
-
-
-  update(now) {
+  update(now, dt) {
 
     if (this.animator) {
 
-      let animation = this.animator.update(now);
+      let animation = this.animator.update(now, dt);
 
       if (animation) {
 
@@ -127,7 +124,7 @@ class Sprite extends Entity {
         this.bgLeft = frame.left;
         this.width  = frame.width;
         this.height = frame.height;
-        
+
         this.hw = (this.width / 2)|0;
         this.hh = (this.height / 2)|0;
 
