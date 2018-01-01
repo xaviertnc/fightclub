@@ -76,16 +76,20 @@ class Lib {
   }
 
 
-  getAngle(x1, y1, x2, y2) {
+  getAngleRad(x1, y1, x2, y2) {
 
     let dx = x2 - x1;
     let dy = y1 - y2;
+    let rads = Math.atan2(dy, dx);
+    // 'rad' range = 0 to Math.PI (clockwise), 0 to -Math.PI (anti-clockwise)
+    return (rads < 0) ? 2*Math.PI + rads : rads; // Fix +- result of Math.atan2()
 
-    let da = (Math.atan2(dy,  dx) / Math.PI) * 180;
+  }
 
-    // "da"" Range: 0 to 179.9999 (clockwise), 0 to -179.9999 (anti-clockwise)
 
-    return da < 0 ? (360 + da) : da; // +360 because y-axis is reversed on screens!
+  getAngle(x1, y1, x2, y2) {
+
+    return (this.getAngleRad(x1, y1, x2, y2) / Math.PI) * 180;
 
   }
 
