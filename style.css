@@ -17,13 +17,14 @@ body {
 
 #debug-pane {
     float: left;
-    background-color:darkslateblue;
-    border: 3px solid slateblue;
+    background-color: black;
+    border: 3px solid sienna;
     margin-right: 3em;
     min-height: 270px;
-    min-width: 330px;
+    width: 330px;
     padding: 0.67em;
     color: gold;
+    overflow: hidden;
 }
 
 .wizzard {
