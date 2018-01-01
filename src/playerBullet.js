@@ -14,14 +14,25 @@ class PlayerBullet extends Sprite {
 
     super(id);
 
-    this.dir = 0;
+    this.angle = 0;
     this.facing = '';
     this.hitScore = 100;
     this.healthDamage = 5;
     this.className = 'player-bullet';
 
+    this.boundsRect = {
+      x      : 0,
+      y      : 0, 
+      width  : FC.view.getWidth()  - this.width,
+      height : FC.view.getHeight() - this.height
+    };
+
     FC.lib.extend(this, props);
 
+    let angleRad = (this.angle / 180) * Math.PI;
+
+    this.kx = Math.cos(angleRad);
+    this.ky = -Math.sin(angleRad); // ky: Negate "dy" because the y-axis is flipped on screens!
 
     //console.log('PlayerBullet.instance =', this);
 
@@ -35,47 +46,16 @@ class PlayerBullet extends Sprite {
   }
 
 
-  update(now) {
+  update(now, dt) {
 
-    if ( ! this.lastUpdateTime) { this.lastUpdateTime = now; }
+    if (dt > 14) {
 
-    let dts = (now - this.lastUpdateTime) / 100;  // Divide by 100 for seconds
+      let dts = dt / 100;  // Divide by 100 for seconds
 
-    this.lastUpdateTime = now;
+      this.x += this.kx * this.speed * dts; // x + dx, kx -> See constructor
+      this.y += this.ky * this.speed * dts; // y - dy
 
-    if (dts > 0.14) {
-
-      this.lastMoveTime = now;
-
-      let radAngle = (this.dir / 180) * Math.PI; // Convert degrees to radians
-
-      let dx = Math.round(Math.cos(radAngle) * this.speed * dts);
-      let dy = -Math.round(Math.sin(radAngle) * this.speed * dts); // Negate dy because the y-axis is flipped on screens!
-
-      let viewRect = {
-        x      : 0,
-        y      : 0, 
-        width  : FC.view.getWidth()  - this.width,
-        height : FC.view.getHeight() - this.height
-      };
-
-      let bulletRect = {
-        x: this.x + dx,
-        y: this.y + dy,
-        width: this.width,
-        height: this.height
-      };
-
-      if ( ! FC.lib.outOfBounds(viewRect, bulletRect)) {
-
-        this.x = bulletRect.x;
-        this.y = bulletRect.y;
-
-      } else {
-
-        this.state = 'Used';
-
-      }
+      if (FC.lib.outOfBounds(this.boundsRect, this)) { this.state = 'Used'; }
 
     }
 
