@@ -108,6 +108,7 @@ class Input {
 
   onMouseDown(event) {
 
+    this.mode = 'mouse';
     this.leftMouseDown = true;
     this.mouseDownView.innerText = 'Mouse Down: true';
   }
@@ -241,7 +242,7 @@ class Input {
         this.directionChanged = true;
         this.keyDirectionView.innerText = 'Direction: ' + this.direction;
 
-        console.log('INPUT UPD: Dir Changed! dir =', this.direction, ', lastDir =', this.lastDirection);
+        //console.log('INPUT UPD: Dir Changed! dir =', this.direction, ', lastDir =', this.lastDirection);
 
       }
 
@@ -271,7 +272,6 @@ class Input {
 
   afterUpdate(now) {
 
-    this.keyDown = {};
     this.mouseMoved = false;
     this.leftMouseDown = false;
     this.lastDirection = this.direction;
