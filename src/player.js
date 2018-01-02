@@ -210,9 +210,9 @@ class Player extends Sprite {
 
       }
 
-      if (this.animator && FC.input.directionChanged) {
+      if (this.animator && (FC.input.directionChanged || this.stateChanged)) {
 
-        this.animator.currentAnimation = this.animator.getAnimationFacing(FC.input.direction);
+        this.animator.currentAnimation = this.animator.getAnimationFacing(FC.input.direction, this.state);
         this.facingAngle = this.animator.currentAnimation.dir;
 
       }
@@ -224,11 +224,13 @@ class Player extends Sprite {
 
       }
 
-
       let action = FC.input.action;
 
-      if (action === "Attack") {
+      if (action === 'Attack') {
 
+        let player = this;
+        player.state = 'Attack';
+        setTimeout(function() { player.state = 'Normal'; }, 150);
         this._fireBullet(now, dt, mouseAngle ? mouseAngle : this.facingAngle);
 
       }
