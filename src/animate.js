@@ -104,10 +104,12 @@ class Animator {
   }
 
 
-  getAnimationFacing(facing) {
+  getAnimationFacing(facing, state) {
+
+    console.log('animation.getAnimationFacing(), facing =', facing, ', state =', state);
 
     // Return the FIRST matching animation.
-    return this.animations.find(function(anim) { return anim.facing === facing; });
+    return this.animations.find(function(anim) { return anim.facing === facing && anim.state === state; });
 
   }
 
