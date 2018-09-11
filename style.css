@@ -1,104 +1,94 @@
 body {
+  background: #222;
+  color: darkkhaki;
   font-size: 14px;
   font-family: 'sans-serif';
+  margin: 0;
+  padding: 0;
 }
 
-#page {
-    float: left;
-    max-width: 800px;
+footer {
+  padding: 1em;
 }
 
 #main-view {
-    border: 1px solid blue;
-    height: 600px;
-    position: relative;
-    width: 800px;
+  background: url('img/bg_forest01.png');
+  position: relative;
+  height: 80vh;
+  max-height: 100vw;
 }
 
-#debug-pane {
-    float: left;
-    background-color: black;
-    border: 3px solid sienna;
-    margin-right: 3em;
-    min-height: 270px;
-    width: 330px;
-    padding: 0.67em;
-    color: gold;
-    overflow: hidden;
+.title {
+  position: absolute;
+  top: 0;
+  right: 2%;
+  z-index: 50;
+  line-height: 0.8em;
 }
 
 .wizzard {
-    background: url('img/wizzard/wizzard_spr.png') no-repeat;
-    /*border: 1px solid green;*/
-    position: absolute;
-    z-index: 100;
+  background: url('img/wizzard/wizzard_spr.png') no-repeat;
+  /*border: 1px solid green;*/
+  position: absolute;
+  z-index: 100;
 }
 
-.boss1 {
-    background: url('img/gringe_01.png') no-repeat;
-    position: absolute;
-    z-index: 100;
+.gringe {
+  background: url('img/gringe/gringe_spr.png') no-repeat;
+  position: absolute;
+  z-index: 100;
 }
 
 .score {
-    font-size: 1.34em;
-    padding: 0.5em;
+  font-size: 2em;
+  padding: 0.3em;
+	color: burlywood;
+	font-weight: bold;
 }
 
 .health-bar {
-    background-color: crimson;
-    position: absolute;
-    z-index: 150;
+  background-color: crimson;
+  position: absolute;
+  z-index: 150;
 }
 
 .health-bar-inner {
-    background-color: lime;
-    display: block;
-    font-size: 0.6em;
-    height: 100%;
+  color: black;
+  background-color: lime;
+  display: block;
+  font-size: 0.6em;
+  height: 100%;
 }
-
-/*
-.pointer {
-    border: 1px solid aqua;
-    position: absolute;
-    z-index: 200;
-    transform-origin: 50% 50% 0px;
-    transform: rotate(30deg);
-}
-*/
 
 .pointer-line {
-    top: 0;
-    left: 0;
-    position: absolute;
-    z-index: 50;
-    width: 800px;
-    height: 600px;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 50;
 }
 
 .player-bullet {
-    background: url('img/iceball_01.png') no-repeat;
-    position: absolute;
-    z-index: 200;
+  background: url('img/iceball_01.png') no-repeat;
+  position: absolute;
+  z-index: 200;
 }
 
 .actionbar {
-    padding: 1em 0;
+  float: right;
 }
 
 .Impacting {
-    background-color: crimson;
+  background-color: crimson;
 }
 
 .flipH {
-    transform: scaleX(-1);
-    filter: flipH;
-    -ms-filter: "FlipH";
+  transform: scaleX(-1);
+  filter: flipH;
+  -ms-filter: "FlipH";
 }
 
 .flipV {
-    transform: scaleY(-1);
-    filter: flipV;
-    -ms-filter: "FlipV";
+  transform: scaleY(-1);
+  filter: flipV;
+  -ms-filter: "FlipV";
 }

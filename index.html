@@ -11,18 +11,23 @@
 
   <body>
 
-    <div id="debug-pane"></div>
-
     <div id="page">
 
-      <h1>Welcome to Fight Club</h1>
+      <h1 class="title">Welcome to Fight Club</h1>
 
-      <div id="main-view"></div>
+      <main id="main-view"></main>
 
-      <div class="actionbar">
-        <button id="start" onclick="FC.game.start()" type="button" >Start</button>&nbsp;&nbsp;
-        <button id="stop"  onclick="FC.game.stop()"  type="button">Stop</button>
-      </div>
+      <footer>
+
+        <div class="actionbar">
+          <button id="start" onclick="FC.game.start()" type="button" >Start</button>&nbsp;&nbsp;
+          <button id="stop"  onclick="FC.game.stop()"  type="button">Stop</button>
+        </div>
+
+        <div id="debug-pane"></div>
+
+      </footer>
+
 
     </div>
 
