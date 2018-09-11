@@ -8,16 +8,22 @@
 
 console.log('Welcome to Fight Club!');
 
-FC.lib   = new Lib();
+window.onload = function() {
 
-FC.view  = new View();
+  FC.lib   = new Lib();
 
-FC.debug = new DebugView();
+  FC.view  = new View();
 
-FC.input = new Input();
+  FC.debug = new DebugView();
 
-FC.game  = new GameEngine();
+  FC.input = new Input();
 
-FC.game.start();
+  console.log('View.width:', FC.view.getWidth(), ', height:', FC.view.getHeight());
 
-FC.game.stop();
+  FC.game = new GameEngine(FC.view, FC.input, FC.config);
+
+  FC.game.start();
+
+  FC.game.stop();
+
+};

@@ -26,6 +26,11 @@ class Boss extends Npc {
       height : 10
     });
 
+    // Sprite::render() uses the animator if available
+    this.animator = new Animator(this);
+
+    this.animator.currentAnimation = this.animator.getAnimationFacing('Left', 'Normal');
+
     console.log('Boss.instance =', this);
 
   }

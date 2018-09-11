@@ -22,8 +22,8 @@ class PointerLine {
     FC.lib.extend(this, props);
 
     this.elm = document.createElement('div');
-    
-    this.elm.innerHTML = '<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg"> <line ' +
+
+    this.elm.innerHTML = '<svg viewBox="0 0 ' + FC.view.getWidth() + ' ' + FC.view.getHeight() + '" xmlns="http://www.w3.org/2000/svg"> <line ' +
       'x1="' + this.x1 + '" y1="' + this.y1 + '" x2="' + this.x2 + '" y2="' + this.y1 +
       '" stroke-width="1" stroke="crimson" /></svg>';
 
@@ -33,26 +33,25 @@ class PointerLine {
 
     FC.view.elm.appendChild(this.elm);
 
+    this.getAngleRad = FC.lib.getAngleRad;
+
     console.log('PointerLine.instance =', this);
 
   }
 
 
-  update(now, playerElm, mouseX, mouseY) {
+  update(now, view, input, player) {
 
-    //console.log('PointerLine.update mouseXY =', mouseX, mouseY);
-    //console.log('PointerLine.update.this =', this, ', playerElm:', playerElm);
+    if (input.mode === 'mouse') {
 
-    if (FC.input.mode === 'mouse') {
+      this.x1 = player.x + 15;
+      this.y1 = player.y + 30;
 
-      this.x1 = playerElm.offsetLeft + 15;
-      this.y1 = playerElm.offsetTop + 30;
-
-      let angleRad = FC.lib.getAngleRad(
+      let angleRad = this.getAngleRad(
         this.x1,
-        this.y1, 
-        mouseX - FC.view.elm.offsetLeft,
-        mouseY - FC.view.elm.offsetTop
+        this.y1,
+        input.mouseX - view.getX(),
+        input.mouseY - view.getY()
       );
 
       this.x2 = this.x1 + Math.cos(angleRad) * this.length;
@@ -63,11 +62,11 @@ class PointerLine {
   }
 
 
-  render() {
+  render(inputMode) {
 
-    if (FC.input.mode === 'mouse') {
+    if (inputMode === 'mouse') {
 
-      this.elm.style.opacity = 0.3;
+      this.elm.style.opacity = 0.5;
 
       this.innerElm.setAttribute('x1', this.x1);
       this.innerElm.setAttribute('y1', this.y1);

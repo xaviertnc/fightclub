@@ -22,11 +22,11 @@ class Player extends Sprite {
 
     FC.lib.extend(this, props);
 
-    this.hw = (this.width / 2)|0;
-    this.hh = (this.height / 2)|0;
-
     // Sprite::render() uses the animator if available
     this.animator = new Animator(this);
+
+    this.hw = (this.width / 2)|0;
+    this.hh = (this.height / 2)|0;
 
     console.log('Player.instance =', this);
 

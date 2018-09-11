@@ -183,6 +183,35 @@ FC.config = {
 
     }
 
+  },
+
+  boss1: {
+
+    animation: {
+
+      defaultAnimationId: 0,
+
+      animationsCfg: [
+
+        // NORMAL
+        {
+          id: 0,
+          dir: 0,
+          speed: 300,
+          state: 'Normal',
+          facing: 'Left',
+          defaultFrameIndex: 0,
+          framesCfg: [
+            { index: 0, top: 0, left: 0  , width: 64, height: 64 },
+            { index: 1, top: 0, left: 64 , width: 64, height: 64 }
+          ],
+          className: 'gringe'
+        }
+
+     ]
+
+    }
+
   }
 
 };

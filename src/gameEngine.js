@@ -9,32 +9,29 @@
 
 class GameEngine {
 
-  constructor() {
+  constructor(view, input, config) {
+
+    this.view = view;
+    this.input = input;
+    this.config = config;
 
     this.debug = true;
 
-    this.fps = 62;
-    this.ticks = 0;
     this.startTime = 0;
     this.lastTime = 0;
     this.stepTimer = null;
     this.state = null;
 
     this.score = new Score('score', { x: 10,  y: 10,  height: 30, width: 270 });
-    this.enemy = new Boss('boss1', { x: 575, y: 250, height: 64, width: 64, vertSpeed: 30, horzSpeed: 30 });
-    this.player = new Player('player', { x: 150, y: 250, vertSpeed: 30, horzSpeed: 30, animation: FC.config.player.animation });
+    this.enemy = new Boss('boss1', { x: 575, y: 250, width: 64, height: 64, vertSpeed: 30, horzSpeed: 30, animation: config.boss1.animation });
+    this.player = new Player('player', { x: 150, y: 250, vertSpeed: 30, horzSpeed: 30, animation: config.player.animation });
 
     this.startBtn = document.getElementById('start');
     this.stopBtn = document.getElementById('stop');
 
+    this.getTime = FC.lib.getTime;
+
     this.pointer = null;
-
-  }
-
-
-  getTime() {
-
-    return FC.lib.getTime();
 
   }
 
@@ -50,7 +47,7 @@ class GameEngine {
 
   update(now, dt) {
 
-    FC.input.update(now, dt);
+    this.input.update(now, dt);
 
     this.score.update(now, dt);
     this.player.update(now, dt);
@@ -58,7 +55,7 @@ class GameEngine {
 
     if (this.pointer) {
 
-      this.pointer.update(now, this.player.elm, FC.input.mouseX, FC.input.mouseY);
+      this.pointer.update(now, this.view, this.input, this.player);
 
     }
 
@@ -71,7 +68,7 @@ class GameEngine {
     this.player.afterUpdate(now, dt);
     this.enemy.afterUpdate(now, dt);
 
-    FC.input.afterUpdate(now, dt);
+    this.input.afterUpdate(now, dt);
 
   }
 
@@ -84,17 +81,17 @@ class GameEngine {
 
     if (this.pointer) {
 
-      this.pointer.render();
+      this.pointer.render(this.input.mode);
 
     }
 
   }
 
 
-  step() {
+  step(now) {
 
-    let now = this.getTime();
-    
+    //let now = this.getTime();
+
     let dt = now - this.lastTime;
 
     this.beforeUpdate(now, dt);
@@ -105,13 +102,11 @@ class GameEngine {
 
     this.render();
 
-    this.ticks++;
-
     this.lastTime = now;
 
     if (this.state === 'Running') {
 
-      this.stepTimer = window.setTimeout(this.step.bind(this), (1000 / this.fps));
+      this.stepTimer = window.requestAnimationFrame(this.step.bind(this));
 
     }
 
@@ -129,11 +124,11 @@ class GameEngine {
     this.stopBtn.disabled = false;
     this.startBtn.disabled = true;
 
-    window.clearTimeout(this.stepTimer);
+    window.cancelAnimationFrame(this.stepTimer);
 
     this.pointer = new PointerLine('pointer');
 
-    this.step();
+    this.step(this.startTime);
 
   }
 
