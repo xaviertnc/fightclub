@@ -4,17 +4,42 @@
  * @author: C. Moller
  * @date: 26 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Rename top-level keys "animation" + "animationsCfg"
+ *   - Move x,y,height,width,vertSpeed,.. settings to config
+ *   - Add "debug" setting to control game.log()
+ *   - Add "Score" section
  */
 
 FC.config = {
 
+  debug: false,
+
+  score: {
+
+    x: 10,
+    y: 10,
+
+    height: 30,
+    width: 270
+
+  },
+
+
   player: {
+
+    x: 150,
+    y: 250,
+
+    vertSpeed: 30,
+    horzSpeed: 30,
+
+    initialState: 'Normal',
+    startFacing: 'Right',
 
     animation: {
 
-      defaultAnimationId: 0,
-
-      animationsCfg: [
+      animationSets: [
 
         // NORMAL
         {
@@ -178,20 +203,31 @@ FC.config = {
           defaultFrameIndex: 0,
           framesCfg: [{ index: 0, top: 0, left: 288, width: 36, height: 56 }],
           className: 'wizzard'
-        }        
+        }
       ]
 
     }
 
   },
 
+
   boss1: {
+
+    x: 575,
+    y: 250,
+
+    width: 64,
+    height: 64,
+
+    vertSpeed: 30,
+    horzSpeed: 30,
+
+    initialState: 'Normal',
+    startFacing: 'Left',
 
     animation: {
 
-      defaultAnimationId: 0,
-
-      animationsCfg: [
+      animationSets: [
 
         // NORMAL
         {
