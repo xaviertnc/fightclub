@@ -5,77 +5,100 @@
  * @author: C. Moller
  * @date: 29 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Now extends Sprite
+ *   - Add init(), build() + Refactor
+ *   - Fix SVG Line rendering issue!
+ *   - Add elSvg + elSvgLine
+ *   - Rename x1, y1 to x, y
+ *   - Rename x2, y2 to ex, ey
  */
 
-class PointerLine {
+class PointerLine extends Sprite {
 
-  constructor(id, props) {
 
-    this.x1 = 0;
-    this.y1 = 0;
-    this.x2 = 0;
-    this.y2 = 0;
+  init(props) {
 
+    this.ex = 0;
+    this.ey = 0;
     this.length = 80; // pixels
-    this.className = 'pointer-line';
+    this.elSvgLine = null;
+    this.elSvg = null;
 
-    FC.lib.extend(this, props);
-
-    this.elm = document.createElement('div');
-
-    this.elm.innerHTML = '<svg viewBox="0 0 ' + FC.view.getWidth() + ' ' + FC.view.getHeight() + '" xmlns="http://www.w3.org/2000/svg"> <line ' +
-      'x1="' + this.x1 + '" y1="' + this.y1 + '" x2="' + this.x2 + '" y2="' + this.y1 +
-      '" stroke-width="1" stroke="crimson" /></svg>';
-
-    this.elm.className = this.className;
-
-    this.innerElm = this.elm.firstElementChild.firstElementChild;
-
-    FC.view.elm.appendChild(this.elm);
-
-    this.getAngleRad = FC.lib.getAngleRad;
-
-    console.log('PointerLine.instance =', this);
+    return super.init(props);
 
   }
 
 
-  update(now, view, input, player) {
+  build(elm) {
 
-    if (input.mode === 'mouse') {
+    let vw = this.game.view.getWidth();
+    let vh = this.game.view.getHeight();
 
-      this.x1 = player.x + 15;
-      this.y1 = player.y + 30;
+    this.elm = elm || document.createElement('div');
 
-      let angleRad = this.getAngleRad(
-        this.x1,
-        this.y1,
-        input.mouseX - view.getX(),
-        input.mouseY - view.getY()
-      );
+    this.elSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    this.elSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    this.elSvg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+    this.elSvg.setAttribute('height', vh);
+    this.elSvg.setAttribute('width', vw);
 
-      this.x2 = this.x1 + Math.cos(angleRad) * this.length;
-      this.y2 = this.y1 - Math.sin(angleRad) * this.length;
+    this.elSvgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    this.elSvgLine.setAttribute('x1', this.x);
+    this.elSvgLine.setAttribute('y1', this.y);
+    this.elSvgLine.setAttribute('x2', this.ex);
+    this.elSvgLine.setAttribute('y2', this.ey);
+    this.elSvgLine.setAttribute('stroke-width', 1);
+    this.elSvgLine.setAttribute('stroke', 'crimson');
+
+    this.elSvg.appendChild(this.elSvgLine);
+    this.elm.appendChild(this.elSvg);
+
+    this.elm.className = 'pointer-line';
+
+    this.game.log('PointerLine.build(),', this.elm);
+
+    return this;
+
+  }
+
+
+  render() {
+
+    if (this.game.input.mode === 'mouse') {
+
+      this.elm.style.opacity = 0.5;
+
+      this.elSvgLine.setAttribute('x1', this.x);
+      this.elSvgLine.setAttribute('y1', this.y);
+      this.elSvgLine.setAttribute('x2', this.ex);
+      this.elSvgLine.setAttribute('y2', this.ey);
+
+    } else {
+
+      this.elm.style.opacity = 0;
 
     }
 
   }
 
 
-  render(inputMode) {
+  update(now) {
 
-    if (inputMode === 'mouse') {
+    if (this.game.input.mode === 'mouse') {
 
-      this.elm.style.opacity = 0.5;
+      this.x = this.game.player.x + 15;
+      this.y = this.game.player.y + 30;
 
-      this.innerElm.setAttribute('x1', this.x1);
-      this.innerElm.setAttribute('y1', this.y1);
-      this.innerElm.setAttribute('x2', this.x2);
-      this.innerElm.setAttribute('y2', this.y2);
+      let angleRad = this.game.lib.getAngleRad(
+        this.x,
+        this.y,
+        this.game.input.mouseX - this.game.view.getX(),
+        this.game.input.mouseY - this.game.view.getY()
+      );
 
-    } else {
-
-      this.elm.style.opacity = 0;
+      this.ex = this.x + Math.cos(angleRad) * this.length;
+      this.ey = this.y - Math.sin(angleRad) * this.length;
 
     }
 
