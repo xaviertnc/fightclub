@@ -5,43 +5,61 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add game + type to constructor params
+ *   - Add shortcuts: outOfBounds, intersectRect
+ *   - Add init() + Refactor
  */
-
 
 class PlayerBullet extends Sprite {
 
-  constructor(id, props) {
 
-    super(id);
+  constructor(id, game, type) {
 
+    super(id, game, type);
+
+    this.kx = 0;
+    this.ky = 0;
     this.angle = 0;
     this.facing = '';
     this.hitScore = 100;
     this.healthDamage = 5;
     this.className = 'player-bullet';
+    this.boundsRect = {};
+
+  }
+
+
+  init(props) {
+
+    super.init(props);
+
+    let vw = this.game.view.getWidth();
+    let vh = this.game.view.getHeight();
 
     this.boundsRect = {
       x      : 0,
-      y      : 0, 
-      width  : FC.view.getWidth()  - this.width,
-      height : FC.view.getHeight() - this.height
+      y      : 0,
+      width  : vw - this.width,
+      height : vh - this.height
     };
-
-    FC.lib.extend(this, props);
 
     let angleRad = (this.angle / 180) * Math.PI;
 
     this.kx = Math.cos(angleRad);
     this.ky = -Math.sin(angleRad); // ky: Negate "dy" because the y-axis is flipped on screens!
 
-    //console.log('PlayerBullet.instance =', this);
+    this.outOfBounds = this.game.lib.outOfBounds;
+    this.intersectRect = this.game.lib.intersectRect;
+
+    return this;
 
   }
 
 
   detectCollision(enemy) {
 
-    return FC.lib.intersectRect(this, enemy);
+    return this.intersectRect(this, enemy);
 
   }
 
@@ -55,7 +73,7 @@ class PlayerBullet extends Sprite {
       this.x += this.kx * this.speed * dts; // x + dx, kx -> See constructor
       this.y += this.ky * this.speed * dts; // y - dy
 
-      if (FC.lib.outOfBounds(this.boundsRect, this)) { this.state = 'Used'; }
+      if (this.outOfBounds(this.boundsRect, this)) { this.state = 'Used'; }
 
     }
 
@@ -64,4 +82,4 @@ class PlayerBullet extends Sprite {
   }
 
 
-} // end: PlayerBullet class
+} // End: PlayerBullet Class
