@@ -5,40 +5,68 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add game + type to constructor params
+ *   - Add init(), build(), mount() + Refactor
+ *   - Put Heatlh Bar inside Boss element
  */
 
 class Boss extends Npc {
 
-  constructor(id, props) {
 
-    super(id);
+  constructor(id, game, type) {
+
+    super(id, game, type);
 
     this.health = 100;
     this.className = 'boss1';
 
-    FC.lib.extend(this, props);
-
-    this.healthBar = new HealthBar(id + '-health-bar',
-    {
-      x      : props.x,
-      y      : props.y - 15,
-      width  : props.width,
-      height : 10
-    });
-
     // Sprite::render() uses the animator if available
     this.animator = new Animator(this);
 
-    this.animator.currentAnimation = this.animator.getAnimationFacing('Left', 'Normal');
+    this.healthBar = new HealthBar(this.id + '-health-bar', this.game);    
 
-    console.log('Boss.instance =', this);
+  }
+
+
+  init(props) {
+
+    super.init(props);
+
+    this.animator.init({
+      startFacing: this.startFacing,
+      initialState: this.initialState
+    });
+
+    this.healthBar.init({ y: -15, width: this.width, height: 10 });
+
+    return this;
+
+  }
+
+
+  build(elm) {
+
+    super.build(elm);
+    this.healthBar.build();
+    this.game.log('Boss.build(),', this.id, '- Done');
+    return this;
+
+  }
+
+
+  mount(parentElm) {
+
+    super.mount(parentElm);
+    this.healthBar.mount(this.elm);
+    return this.elm;
 
   }
 
 
   takeHit(objOther) {
 
-    this.health = FC.lib.approach(this.health, 0, objOther.healthDamage || 1);
+    this.health = this.game.lib.approach(this.health, 0, objOther.healthDamage || 1);
     this.healthBar.state = this.health;
 
   }
@@ -76,4 +104,4 @@ class Boss extends Npc {
   }
 
 
-} // end: Boss class
+} // End: Boss Class
