@@ -4,26 +4,25 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: C. Moller - 05 Feb 2020
+ *   Significant Refactor:
+ *   - Moved most top-level objects from FC to FC.game
+ *   - Added FC.log(). Disable via FC.config.debug = false.
+ *   - Added init(), build(), mount(), dismount() to obj classes.
+ *   - Refactor View Class
+ *   - Refactor InputService Class
+ *   - Refactor Animator, Animation, ... Classes
+ *   - Added game.updateDebugView() + Update affected.
+ *   - Fixed Pointer SVG Line rendering issue.
  */
 
 console.log('Welcome to Fight Club!');
 
 window.onload = function() {
 
-  FC.lib   = new Lib();
+  FC.log = window.console.log && FC.config.debug ? console.log : function(){};
 
-  FC.view  = new View();
-
-  FC.debug = new DebugView();
-
-  FC.input = new Input();
-
-  console.log('View.width:', FC.view.getWidth(), ', height:', FC.view.getHeight());
-
-  FC.game = new GameEngine(FC.view, FC.input, FC.config);
-
-  FC.game.start();
-
-  FC.game.stop();
+  FC.gameEngine = new GameEngine(FC.config);
+  FC.gameEngine.init();
 
 };
