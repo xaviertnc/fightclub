@@ -5,13 +5,17 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add game + type to constructor params
+ *   - Add build(), mount(), dismount() + Refactor
  */
 
 class Sprite extends Entity {
 
-  constructor(id, props) {
 
-    super(id);
+  constructor(id, game, type) {
+
+    super(id, game, type);
 
     this.x = 0;
     this.y = 0;
@@ -29,23 +33,120 @@ class Sprite extends Entity {
     this.firstRender = true;
     this.styleParams = {};
     this.className = '';
+    this.mounted = false;
     this.tagName = 'div';
+    this.elm = null;
 
-    FC.lib.extend(this, props);
+  }
 
-    // Sprite Element Rules:
-    // =====================
-    // If the element already exists in the DOM, select it FIRST, then
-    // call the sprite constructor while passing the element as "props.elm".
 
-    // -- else --
+  build(elm) {
 
-    // A sprite element will be created and inserted into the view element 
-    // with the tagName spesified by "this.tagName' or as a DIV by default.
+    if (elm) { this.elm = elm; }
+    else { this.elm = document.createElement(this.tagName || 'div'); }
+    this.game.log('Sprite.build()', this.type + ': ' + this.id, '- Done,', this.elm);
+    return this;
 
-    this.elm = FC.view.addElement(this.elm, this.tagName);
+  }
 
-    this.elm.id = this.id;
+
+  mount(parentElm) {
+
+    if ( ! parentElm) {
+      this.elm = document.getElementById(this.id);
+      if (this.elm) {
+        this.mounted = true;
+        this.game.log('Sprite.mount()', this.type + ': ' + this.id, '- Element already mounted!', this.elm);
+        return this;
+      }
+      parentElm = document.body;
+    }
+
+    if ( ! this.elm) {
+      this.elm = document.createElement(this.tagName || 'div');
+    }
+
+    parentElm.appendChild(this.elm);
+
+    this.mounted = true;
+
+    this.game.log('Sprite.mount()', this.type + ': ' + this.id, '- Done, parentElm =', parentElm);
+
+    return this;
+
+  }
+
+
+  dismount() {
+
+    this.elm.remove();
+
+    this.mounted = false;
+
+    return this.elm;
+
+  }
+
+
+  render() {
+
+    if (this.firstRender) {
+
+      this._renderClass();
+      this._renderStyle();
+
+      this.firstRender = false;
+
+    } else {
+
+      if (this.stateChanged || this.classUpdated) { this._renderClass(); }
+      if (this.styleUpdated) { this._renderStyle(); }
+
+    }
+
+    this.classUpdated = false;
+    this.styleUpdated = false;
+
+  }
+
+
+  update(now, dt) {
+
+    if (this.animator) {
+
+      let animation = this.animator.update(now, dt);
+
+      if (animation) {
+
+        let frame = animation.currentFrame;
+
+        this.bgTop  = frame.top;
+        this.bgLeft = frame.left;
+        this.width  = frame.width;
+        this.height = frame.height;
+
+        this.hw = (this.width / 2)|0;
+        this.hh = (this.height / 2)|0;
+
+        if (this.animator.animationChanged || animation.frameChanged || this.firstRender) {
+
+          this.className = animation.className;
+
+          if (frame.flipH) { this.className += ' flipH'; }
+          if (frame.flipV) { this.className += ' flipV'; }
+
+          this.classUpdated = true;
+
+          //this.game.log('frame.flipH =', frame.flipH, ', sprite.id:', this.id,
+          //  ', sprite.className:', this.className);
+
+        }
+
+      }
+
+    }
+
+    this._updateStyle();
 
   }
 
@@ -89,86 +190,25 @@ class Sprite extends Entity {
 
   _renderClass() {
 
-    FC.lib.setClass(this.elm, this.className + ' ' + this.state);
+    this.elm.className = this.className + ' ' + this.state;
 
   }
 
 
   _renderStyle() {
 
-      let styleStr = 'left:' + this.x + 'px;top:' + this.y + 'px;'
-        + 'height:' + this.height + 'px;width:'  + this.width  + 'px;';
-
-      if (this.animator) {
-
-        styleStr += 'background-position:-' + this.bgLeft + 'px ' + this.bgTop + 'px;';
-
-      }
-
-      this.elm.style = styleStr;
-
-  }
-
-
-  update(now, dt) {
+    let styleStr = 'left:' + this.x + 'px;top:' + this.y + 'px;'
+      + 'height:' + this.height + 'px;width:'  + this.width  + 'px;';
 
     if (this.animator) {
 
-      let animation = this.animator.update(now, dt);
-
-      if (animation) {
-
-        let frame = animation.currentFrame;
-
-        this.bgTop  = frame.top;
-        this.bgLeft = frame.left;
-        this.width  = frame.width;
-        this.height = frame.height;
-
-        this.hw = (this.width / 2)|0;
-        this.hh = (this.height / 2)|0;
-
-        if (this.animator.animationChanged || animation.frameChanged || this.firstRender) {
-
-          this.className = animation.className;
-
-          if (frame.flipH) { this.className += ' flipH'; }
-          if (frame.flipV) { this.className += ' flipV'; }
-
-          this.classUpdated = true;
-
-          //console.log('frame.flipH =', frame.flipH, ', sprite.id:', this.id, ', sprite.className:', this.className);
-
-        }
-
-      }
+      styleStr += 'background-position:-' + this.bgLeft + 'px ' + this.bgTop + 'px;';
 
     }
 
-    this._updateStyle();
+    this.elm.style = styleStr;
 
   }
 
 
-  render() {
-
-    if (this.firstRender) {
-
-      this._renderClass();
-      this._renderStyle();
-
-      this.firstRender = false;
-
-    } else {
-
-      if (this.stateChanged || this.classUpdated) { this._renderClass(); }
-      if (this.styleUpdated) { this._renderStyle(); }
-
-    }
-
-    this.classUpdated = false;
-    this.styleUpdated = false;
-
-  }
-
-} // end: Sprite class
+} // End: Sprite Class
