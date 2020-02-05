@@ -18,39 +18,60 @@ class GameEngine {
 
   constructor(config) {
 
+    this.config = config;
+
     FC.log('');
     FC.log('gameEngine.construct(), config =', config);
 
-    this.config = config;
     this.log = FC.log;
 
-    FC.log('');
-    FC.log('gameEngine.construct() - Create Static Objects..');
     this.lib = new Lib(this);
+
     this.input = new InputService(this);
     this.view = new View('main-view', this);
     this.debugView = new View('debug-pane', this);
 
+    this.input.init();
+    this.view.init();
+    this.debugView.init();
+
+    this.input.mount();
+    this.view.mount();
+    this.debugView.mount();
+
+    this.stopBtn = document.getElementById('stop');
+    this.startBtn = document.getElementById('start');
+
+    // Step gets called by window.requestAnimationFrame() as callback.
+    // Hence, "this === window" but we need it to be === "FC.game"
     this.step.bind(this);
+
+    // Shortcut
+    this.now = this.lib.getTime;
 
     FC.log('gameEngine.construct() - Done');
 
   }
 
 
+  /**
+    * The idea behind init() is to enable us
+    * to "reset" the game.
+    *
+    */
   init() {
 
     this.log('');
     this.log('gameEngine.init() - Start');
 
     this.nextId = 0;
-    this.state = 'Idle';
+    this.lastTime = 0;
+    this.startTime = 0;
     this.stepTimer = null;
-    this.startTime = this.lib.getTime();
-    this.lastTime = this.startTime;
+    this.state = 'Idle';
 
     this.log('');
-    this.log('gameEngine.init() - Create Dynamic Objects..');
+    this.log('gameEngine.init() - Create Game Objects..');
     this.score = new Score('score', this);
     this.enemy = new Boss('boss1', this);
     this.player = new Player('player', this);
@@ -58,9 +79,6 @@ class GameEngine {
 
     this.log('');
     this.log('gameEngine.init() - Initialize Game Objects..');
-    this.input.init();
-    this.view.init();
-    this.debugView.init();
     this.score.init(this.config.score);
     this.enemy.init(this.config.boss1);
     this.player.init(this.config.player);
@@ -73,40 +91,35 @@ class GameEngine {
 
     this.log('');
     this.log('gameEngine.init() - Mount Game Object Views..');
-    this.input.mount();
-    this.view.mount();
-    this.debugView.mount();
     this.score.mount(this.view.elm);
     this.enemy.mount(this.view.elm);
     this.player.mount(this.view.elm);
 
-    this.startBtn = document.getElementById('start');
-    this.stopBtn = document.getElementById('stop');
-
-    this.step(this.startTime);
-
     this.log('');
     this.log('gameEngine.init() - Done,', this);
+
+    return this;
 
   }
 
 
-  start() {
+  start(startState) {
 
     this.log('');
     this.log('gameEngine.start()');
 
-    this.state = 'Running';
-
-    this.startTime = this.lib.getTime();
-
-    this.stopBtn.disabled = false;
-    this.startBtn.disabled = true;
+    this.state = startState || 'Running';
 
     window.cancelAnimationFrame(this.stepTimer);
 
-    this.pointer = new PointerLine('player-pointer', this);
-    this.pointer.init().build().mount(this.view.elm);
+    if (this.state === 'Running') {
+      this.pointer = new PointerLine('player-pointer', this);
+      this.pointer.init().build().mount(this.view.elm);
+      this.startBtn.disabled = true;
+      this.stopBtn.disabled = false;
+    }
+
+    this.startTime = this.now();
 
     this.step(this.startTime);
 
@@ -137,8 +150,6 @@ class GameEngine {
 
   step(now) {
 
-    //let now = this.getTime();
-
     let dt = now - this.lastTime;
 
     this.beforeUpdate(now, dt);
@@ -153,7 +164,7 @@ class GameEngine {
 
     if (this.state === 'Running') {
 
-      this.stepTimer = window.requestAnimationFrame(this.step.bind(this));
+      this.stepTimer = window.requestAnimationFrame(this.step);
 
     }
 
