@@ -5,11 +5,21 @@
  * @author: C. Moller
  * @date: 26 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Rename from Input to InputService
+ *   - Add "game" to constructor params
+ *   - Add init(), mount() + Refactor
+ *   - Totally refactor debug views. Use "updateDebugView"
+ *   - Add "debugView" and "rateLimit" shorthand props
  */
 
-class Input {
+class InputService {
 
-  constructor() {
+
+  constructor(game) {
+
+    this.game = game;
+    game.log('new InputService()');
 
     this.mode = 'kb';
 
@@ -46,7 +56,6 @@ class Input {
 
     this.keysDown = {};
 
-
     this.mdx = 0;
     this.mdy = 0;
     this.mouseX = 0;
@@ -57,28 +66,55 @@ class Input {
     this.mouseMoved = false;
     this.mouseMoveRate = 60; // ms
 
-    this.leftMouseDown = false; 
+    this.leftMouseDown = false;
     this.rightMouseDown = false;
 
-    document.addEventListener('keydown'   , this.onKeyDown.bind(this));
-    document.addEventListener('keyup'     , this.onKeyUp.bind(this));
-    document.addEventListener('mouseup'   , this.onMouseUp.bind(this));
-    document.addEventListener('mousedown' , this.onMouseDown.bind(this));
-    document.addEventListener('mousemove' , FC.lib.rateLimit(this.onMouseMove.bind(this), this.mouseMoveRate));
+    this.elm = null;
 
-    this.inputModeView = FC.debug.addElement();
-    this.mouseXYView = FC.debug.addElement();
-    this.mouseDownView = FC.debug.addElement();
-    this.keysDownView = FC.debug.addElement();
-    this.keysDirectionsView = FC.debug.addElement();
-    this.keyDirectionView = FC.debug.addElement();
+  }
+
+
+  init(props) {
+
+    for (let prop in props) { this[prop] = props[prop]; }
+
+    this.debugView = this.game.debugView;
+    this.rateLimit = this.game.lib.rateLimit;
+
+    this.game.log('InputService.init() - Done,', this);
+
+    return this;
+
+  }
+
+
+  mount(elm) {
+
+    this.elm = elm ? elm : document.documentElement;
+
+    this.elm.addEventListener('keydown'   , this.onKeyDown.bind(this));
+    this.elm.addEventListener('keyup'     , this.onKeyUp.bind(this));
+    this.elm.addEventListener('mouseup'   , this.onMouseUp.bind(this));
+    this.elm.addEventListener('mousedown' , this.onMouseDown.bind(this));
+    this.elm.addEventListener('mousemove' , this.rateLimit(this.onMouseMove.bind(this), this.mouseMoveRate));
+
+    this.debugView.addItem('input_mode');
+    this.debugView.addItem('mouse_xy');
+    this.debugView.addItem('mouse_down');
+    this.debugView.addItem('keys_down');
+    this.debugView.addItem('directions');
+    this.debugView.addItem('direction');
+
+    this.game.log('InputService.mount() - Done');
+
+    return this;
 
   }
 
 
   onKeyDown(event) {
 
-    //console.log('FC.input.onKeyDown()');
+    //this.game.log('Input.onKeyDown()');
 
     var keyCode = (event.keyCode ? event.keyCode : event.which);
 
@@ -86,14 +122,14 @@ class Input {
 
     this.keysChanged = true;
 
-    this.keysDownView.innerText = 'Keys Down: ' + JSON.stringify(this.keysDown);
+    this.game.updateDebugView('keys_down', 'Keys Down: ' + JSON.stringify(this.keysDown));
 
   }
 
 
   onKeyUp(event) {
 
-    //console.log('FC.input.onKeyUp()');
+    //this.game.log('Input.onKeyUp()');
 
     var keyCode = (event.keyCode ? event.keyCode : event.which);
 
@@ -101,7 +137,7 @@ class Input {
 
     this.keysChanged = true;
 
-    this.keysDownView.innerText = 'Keys Down: ' + JSON.stringify(this.keysDown);
+    this.game.updateDebugView('keys_down', 'Keys Down: ' + JSON.stringify(this.keysDown));
 
   }
 
@@ -110,14 +146,14 @@ class Input {
 
     this.mode = 'mouse';
     this.leftMouseDown = true;
-    this.mouseDownView.innerText = 'Mouse Down: true';
+    this.game.updateDebugView('mouse_down', 'Mouse Down: true');
   }
 
 
   onMouseUp(event) {
 
     this.leftMouseDown = false;
-    this.mouseDownView.innerText = 'Mouse Down:';
+    this.game.updateDebugView('mouse_down', 'Mouse Down:');
 
   }
 
@@ -129,12 +165,12 @@ class Input {
     this.mouseX = event.pageX;
     this.mouseY = event.pageY;
 
-    this.mdx = FC.input.mouseX - FC.input.lastMouseX;
-    this.mdy = FC.input.mouseY - FC.input.lastMouseY;
+    this.mdx = this.mouseX - this.lastMouseX;
+    this.mdy = this.mouseY - this.lastMouseY;
 
     this.mouseMoved = true;
 
-    this.mouseXYView.innerText = 'MouseX: ' + this.mouseX + ', MouseY: ' + this.mouseY;
+    this.game.updateDebugView('mouse_xy', 'MouseX: ' + this.mouseX + ', MouseY: ' + this.mouseY);
 
   }
 
@@ -157,9 +193,9 @@ class Input {
           break;
         }
 
-      } // end: Cycle request types map
+      } // End: Cycle request types map
 
-    } // end: Cycle keys pressed
+    } // End: Cycle keys pressed
 
     return result;
 
@@ -198,7 +234,7 @@ class Input {
 
       }
 
-    } // end: Test combos loop
+    } // End: Test combos loop
 
   }
 
@@ -240,13 +276,13 @@ class Input {
 
         this.mode = 'kb';
         this.directionChanged = true;
-        this.keyDirectionView.innerText = 'Direction: ' + this.direction;
+        this.game.updateDebugView('direction', 'Direction: ' + this.direction);
 
-        //console.log('INPUT UPD: Dir Changed! dir =', this.direction, ', lastDir =', this.lastDirection);
+        //this.game.log('INPUT UPD: Dir Changed! dir =', this.direction, ', lastDir =', this.lastDirection);
 
       }
 
-      this.keysDirectionsView.innerText = 'Directions: ' + JSON.stringify(this.directions);
+      this.game.updateDebugView('directions', 'Directions: ' + JSON.stringify(this.directions));
 
     }
 
@@ -264,9 +300,9 @@ class Input {
 
     }
 
-    this.inputModeView.innerText = 'Input Mode: ' + this.mode;
+    this.game.updateDebugView('input_mode', 'Input Mode: ' + this.mode);
 
-  } // end: Input::update()
+  } // End: Input::update()
 
 
 
@@ -279,4 +315,4 @@ class Input {
   }
 
 
-} // end: Input class
+} // End: Input Class
