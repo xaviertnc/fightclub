@@ -5,33 +5,157 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add lots of debug logs + Organize code.
+ *   - Internalize log, lib, input, view and debugView.
+ *   - Solve initial game.start/stop requirement issue.
+ *   - Implement initialization stages: Create, Init, Build, Mount
+ *   - Add init() + updateDebugView()
  */
 
 class GameEngine {
 
-  constructor(view, input, config) {
 
-    this.view = view;
-    this.input = input;
+  constructor(config) {
+
+    FC.log('');
+    FC.log('gameEngine.construct(), config =', config);
+
     this.config = config;
+    this.log = FC.log;
 
-    this.debug = true;
+    FC.log('');
+    FC.log('gameEngine.construct() - Create Static Objects..');
+    this.lib = new Lib(this);
+    this.input = new InputService(this);
+    this.view = new View('main-view', this);
+    this.debugView = new View('debug-pane', this);
 
-    this.startTime = 0;
-    this.lastTime = 0;
+    this.step.bind(this);
+
+    FC.log('gameEngine.construct() - Done');
+
+  }
+
+
+  init() {
+
+    this.log('');
+    this.log('gameEngine.init() - Start');
+
+    this.nextId = 0;
+    this.state = 'Idle';
     this.stepTimer = null;
-    this.state = null;
+    this.startTime = this.lib.getTime();
+    this.lastTime = this.startTime;
 
-    this.score = new Score('score', { x: 10,  y: 10,  height: 30, width: 270 });
-    this.enemy = new Boss('boss1', { x: 575, y: 250, width: 64, height: 64, vertSpeed: 30, horzSpeed: 30, animation: config.boss1.animation });
-    this.player = new Player('player', { x: 150, y: 250, vertSpeed: 30, horzSpeed: 30, animation: config.player.animation });
+    this.log('');
+    this.log('gameEngine.init() - Create Dynamic Objects..');
+    this.score = new Score('score', this);
+    this.enemy = new Boss('boss1', this);
+    this.player = new Player('player', this);
+    this.pointer = null;
+
+    this.log('');
+    this.log('gameEngine.init() - Initialize Game Objects..');
+    this.input.init();
+    this.view.init();
+    this.debugView.init();
+    this.score.init(this.config.score);
+    this.enemy.init(this.config.boss1);
+    this.player.init(this.config.player);
+
+    this.log('');
+    this.log('gameEngine.init() - Build Game Object Views..');
+    this.score.build();
+    this.enemy.build();
+    this.player.build();
+
+    this.log('');
+    this.log('gameEngine.init() - Mount Game Object Views..');
+    this.input.mount();
+    this.view.mount();
+    this.debugView.mount();
+    this.score.mount(this.view.elm);
+    this.enemy.mount(this.view.elm);
+    this.player.mount(this.view.elm);
 
     this.startBtn = document.getElementById('start');
     this.stopBtn = document.getElementById('stop');
 
-    this.getTime = FC.lib.getTime;
+    this.step(this.startTime);
 
-    this.pointer = null;
+    this.log('');
+    this.log('gameEngine.init() - Done,', this);
+
+  }
+
+
+  start() {
+
+    this.log('');
+    this.log('gameEngine.start()');
+
+    this.state = 'Running';
+
+    this.startTime = this.lib.getTime();
+
+    this.stopBtn.disabled = false;
+    this.startBtn.disabled = true;
+
+    window.cancelAnimationFrame(this.stepTimer);
+
+    this.pointer = new PointerLine('player-pointer', this);
+    this.pointer.init().build().mount(this.view.elm);
+
+    this.step(this.startTime);
+
+  }
+
+
+  stop() {
+
+    this.log('');
+    this.log('gameEngine.stop()');
+
+    window.clearTimeout(this.stepTimer);
+
+    if (this.pointer) {
+
+      this.pointer.dismount();
+      this.pointer = null;
+
+    }
+
+    this.startBtn.disabled = false;
+    this.stopBtn.disabled = true;
+
+    this.state = 'Idle';
+
+  }
+
+
+  step(now) {
+
+    //let now = this.getTime();
+
+    let dt = now - this.lastTime;
+
+    this.beforeUpdate(now, dt);
+
+    this.update(now, dt);
+
+    this.afterUpdate(now, dt);
+
+    this.render();
+
+    this.lastTime = now;
+
+    if (this.state === 'Running') {
+
+      this.stepTimer = window.requestAnimationFrame(this.step.bind(this));
+
+    }
 
   }
 
@@ -88,68 +212,9 @@ class GameEngine {
   }
 
 
-  step(now) {
+  updateDebugView(itemID, value) {
 
-    //let now = this.getTime();
-
-    let dt = now - this.lastTime;
-
-    this.beforeUpdate(now, dt);
-
-    this.update(now, dt);
-
-    this.afterUpdate(now, dt);
-
-    this.render();
-
-    this.lastTime = now;
-
-    if (this.state === 'Running') {
-
-      this.stepTimer = window.requestAnimationFrame(this.step.bind(this));
-
-    }
-
-  }
-
-
-  start() {
-
-    window.console.log('FC.game.start()');
-
-    this.state = 'Running';
-
-    this.startTime = this.getTime();
-
-    this.stopBtn.disabled = false;
-    this.startBtn.disabled = true;
-
-    window.cancelAnimationFrame(this.stepTimer);
-
-    this.pointer = new PointerLine('pointer');
-
-    this.step(this.startTime);
-
-  }
-
-
-  stop() {
-
-    window.console.log('FC.game.stop()');
-
-    window.clearTimeout(this.stepTimer);
-
-    if (this.pointer) {
-
-      this.pointer.elm.remove();
-      this.pointer = undefined;
-
-    }
-
-    this.startBtn.disabled = false;
-    this.stopBtn.disabled = true;
-
-    this.state = 'Idle';
+    this.debugView.getChildElement(itemID).innerText = value;
 
   }
 
