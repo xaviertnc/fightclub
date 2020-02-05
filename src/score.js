@@ -5,21 +5,31 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add init(), build() + Refactor
  */
 
 class Score extends Sprite {
 
-  constructor(id, props) {
+  init(props) {
 
-    super(id);
+    super.init(props);
 
     this.value = 0;
     this.lastValue = 0;
     this.className = 'score';
 
-    FC.lib.extend(this, props);
+    return this;
 
-    console.log('Score.instance =', this);
+  }
+
+
+  build(elm) {
+
+    this.elm = document.createElement('div');
+    this.elm.className = this.className;
+    this.game.log('Score.build() - Done,', this.elm);
+    return this;
 
   }
 
@@ -38,4 +48,5 @@ class Score extends Sprite {
   }
 
 
-} // end: Score class
+} // End: Score Class
+
