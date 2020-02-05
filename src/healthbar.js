@@ -5,32 +5,41 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add init(), build() + Refactor
  */
 
 class HealthBar extends Sprite {
 
-  constructor(id, props) {
 
-    super(id);
+  init(props) {
+
+    super.init(props);
 
     this.state = 100;
     this.className = 'health-bar';
-    this.innerElm = document.createElement('small');
-    this.innerElm.className = 'health-bar-inner';
-    this.innerElm.style = 'width:0';
-    this.elm.appendChild(this.innerElm);
+    this.elBarInner = null;
 
-    FC.lib.extend(this, props);
-
-    console.log('HBar.instance =', this);
+    return this;
 
   }
 
 
-//beforeUpdate(now) {
-//  console.log('HBAR::beforeUpdate(), stateChanged:', this.stateChanged, ', state:', this.state, ', lastState:', this.lastState);    
-//  super.beforeUpdate(now);
-//}
+  build(elm) {
+
+    this.elm = document.createElement('div');
+
+    this.elBarInner = document.createElement('small');
+    this.elBarInner.className = 'health-bar-inner';
+    this.elBarInner.style = 'width:0';
+
+    this.elm.appendChild(this.elBarInner);
+
+    this.game.log('HealthBar.build(),', this.id, '- Done,', this.elm);
+
+    return this;
+
+  }
 
 
   render(now) {
@@ -38,12 +47,14 @@ class HealthBar extends Sprite {
     if (this.stateChanged || this.firstRender) {
 
       super.render(now); // Render Class + Style
-      this.innerElm.style = 'width:' + this.state + '%';
-      this.innerElm.innerText = this.state;
+
+      this.elBarInner.style = 'width:' + this.state + '%';
+      this.elBarInner.innerHTML = this.state;
 
     }
 
   }
-  
 
-} // end: HealthBar class
+
+} // End: HealthBar Class
+
