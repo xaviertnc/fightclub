@@ -5,9 +5,14 @@
  * @author: C. Moller
  * @date: 26 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add "sprite" to constructor params
+ *   - Add Animation.init(), Animator.init() + Refactor
+ *   - Better currentAnimation detect in init()
  */
 
 class AnimationFrame {
+
 
   constructor(props) {
 
@@ -20,20 +25,28 @@ class AnimationFrame {
     this.flipH = false;
     this.flipV = false;
 
-    FC.lib.extend(this, props);
+    for (let prop in props) { this[prop] = props[prop]; }
 
   }
 
-}
+
+} // End: AnimationFrame Class
 
 
 
 class Animation {
 
-  constructor(props) {
 
-    this.id = undefined;
+  constructor(sprite) {
 
+    this.sprite = sprite;
+
+  }
+
+
+  init(props) {
+
+    this.id = null;
     this.speed = 0;
     this.facing = '';
     this.frames = [];
@@ -44,7 +57,7 @@ class Animation {
     this.frameChanged = false;
     this.currentFrame = undefined;
 
-    FC.lib.extend(this, props);
+    for (let prop in props) { this[prop] = props[prop]; }
 
     this.currentFrameIndex = this.defaultFrameIndex || 0;
 
@@ -61,37 +74,45 @@ class Animation {
 
   }
 
-}
+
+} // End: Animation Class
 
 
 
 class Animator {
 
-  constructor(sprite, props) {
+
+  constructor(sprite) {
+
+    this.sprite = sprite;
 
     this.animations = [];
-    this.currentAnimation = null;
     this.lastAnimation = null;
-
     this.animationChanged = false;
+    this.currentAnimation = null;
 
-    FC.lib.extend(this, props);
+    sprite.game.log('new Animator()', sprite.id);
 
-    let cfg = sprite.animation;
-    let animationsCfg = cfg.animationsCfg || [];
-    let defaultAnimId = cfg.defaultAnimationId;
+  }
 
-    // Create all the animation instances based on "sprite.animationsCfg"
-    for (let i = 0, n = animationsCfg.length; i < n; i++) {
 
-      let animation = new Animation(animationsCfg[i]);
+  init(props) {
 
-      // Assign the current animation if a default is set.
-      if (animation.id == defaultAnimId) { this.currentAnimation = animation; }
+    for (let prop in props) { this[prop] = props[prop]; }
 
-      this.animations.push(animation);
+    let animationCfg = this.sprite.animation;
+    let animationSets = animationCfg.animationSets || [];
+    let i = 0, n = animationSets.length;
 
-    }
+    // Create all the animation instances required...
+    for (i = 0; i < n; i++) { this.animations.push(new Animation(this.sprite)); }
+
+    // Initialize every animation instance using "animationsCfg"
+    for (i = 0; i < n; i++) { this.animations[i].init(animationSets[i]); }
+
+    this.currentAnimation = this.getAnimationFacing(this.startFacing, this.initialState);
+
+    this.sprite.game.log('Animator.init(),', this.sprite.id, '- Done', this);
 
   }
 
@@ -148,6 +169,7 @@ class Animator {
 
     return animation;
 
-  }
+  } // End: update
 
-}
+
+} // End: Animator Class
