@@ -1,12 +1,30 @@
-/*globals window */
+/**
+ *
+ * FIGHT CLUB - LIB
+ *
+ * @author: C. Moller
+ * @date: 20 December 2017
+ *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add constructor + game param
+ *   - Log on construct
+ */
 
 class Lib {
+
+  constructor(game) {
+
+    this.game = game;
+    game.log('new Lib()');
+
+  }
+
 
   extend(obj, extendWith) {
 
     if ( ! extendWith) { return; }
 
-    for (var prop in extendWith) {
+    for (let prop in extendWith) {
 
       if (extendWith.hasOwnProperty(prop)) {
 
@@ -42,7 +60,7 @@ class Lib {
 
     let dV = val - limit;
 
-    //console.log('Approach val:', val, ', limit:', limit, ', inc:', increment, ', dV:', dV);
+    //this.game.log('Approach val:', val, ', limit:', limit, ', inc:', increment, ', dV:', dV);
 
     if (dV > 0) {
 
