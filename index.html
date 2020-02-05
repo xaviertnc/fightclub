@@ -6,7 +6,7 @@
     <title>Fight Club</title>
     <link href="favicon.ico" rel="shortcut icon">
     <link rel="stylesheet" href="style.css"/>
-    <script>window.FC = { nextId: 0 };</script>
+    <script>window.FC = {}; /* Define FIGHT CLUB Namespace */</script>
   </head>
 
   <body>
@@ -20,8 +20,8 @@
       <footer>
 
         <div class="actionbar">
-          <button id="start" onclick="FC.game.start()" type="button" >Start</button>&nbsp;&nbsp;
-          <button id="stop"  onclick="FC.game.stop()"  type="button">Stop</button>
+          <button id="start" onclick="FC.gameEngine.start()" type="button" >Start</button>&nbsp;&nbsp;
+          <button id="stop"  onclick="FC.gameEngine.stop()"  type="button">Stop</button>
         </div>
 
         <div id="debug-pane"></div>
@@ -34,10 +34,9 @@
     <script src="src/lib.js"></script>
     <script src="src/config.js"></script>
     <script src="src/entity.js"></script>
-    <script src="src/view.js"></script>
-    <script src="src/debugView.js"></script>
-    <script src="src/input.js"></script>
     <script src="src/sprite.js"></script>
+    <script src="src/input.js"></script>
+    <script src="src/view.js"></script>
     <script src="src/npc.js"></script>
     <script src="src/boss.js"></script>
     <script src="src/score.js"></script>
