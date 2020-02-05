@@ -5,30 +5,47 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
+ * @updated: 05 Feb 2020 (C. Moller)
+ *   - Add game + type to constructor params
+ *   - Add init() + Refactor
+ *   - Refactor bullet init code.
+ *   - Use updateDebugView()
  */
 
 class Player extends Sprite {
 
-  constructor(id, props) {
 
-    super(id);
+  constructor(id, game, type) {
+
+    super(id, game, type);
 
     this.bullets = [];
     this.lastAttack = 0;
     this.maxFireRate = 100; // ms per shot
     this.className = 'wizzard';
-
     this.facingAngle = 0;
-
-    FC.lib.extend(this, props);
+    this.hw = 0;
+    this.hh = 0;
 
     // Sprite::render() uses the animator if available
     this.animator = new Animator(this);
 
+  }
+
+
+  init(props) {
+
+    super.init(props);
+
     this.hw = (this.width / 2)|0;
     this.hh = (this.height / 2)|0;
 
-    console.log('Player.instance =', this);
+    this.animator.init({
+      startFacing: this.startFacing,
+      initialState: this.initialState
+    });
+
+    return this;
 
   }
 
@@ -96,7 +113,9 @@ class Player extends Sprite {
             break;
         }
 
-        let bullet = new PlayerBullet('pb'+(FC.nextId++), {
+        let bullet = new PlayerBullet('pb'+(this.game.nextId++), this.game);
+
+        bullet.init({
             state: 'Live',
             x: bulletX,
             y: bulletY,
@@ -107,6 +126,8 @@ class Player extends Sprite {
             angle: bulletAngle
         });
 
+        bullet.mount(this.game.view.elm);
+
         this.bullets.push(bullet);
 
       }
@@ -116,7 +137,7 @@ class Player extends Sprite {
 
   _updateBullets(now, dt) {
 
-    let game = FC.game;
+    let game = this.game;
 
     // Update LIVE bullets
     this.bullets.forEach(function(bullet) {
@@ -147,10 +168,10 @@ class Player extends Sprite {
       if (bullet.state === 'Used') {
 
         // Remove bullet
-        bullet.elm.remove();
+        bullet.dismount();
         return 0;
 
-      } 
+      }
 
       // Keep bullet
       bullet.afterUpdate(now, dt);
@@ -170,61 +191,65 @@ class Player extends Sprite {
 
   update(now, dt) {
 
-    if (dt > 14) { // Rate limit updates to 14ms per update or max. 71 fps 
+    let lib = this.game.lib;
+    let view = this.game.view;
+    let input = this.game.input;
 
-      if (FC.input.directions.includes("Up"))    { this.y = FC.lib.approach(this.y, 0, this._dy(dt)); }
-      if (FC.input.directions.includes("Down"))  { this.y = FC.lib.approach(this.y, FC.view.getHeight() - this.height, this._dy(dt)); }
-      if (FC.input.directions.includes("Left"))  { this.x = FC.lib.approach(this.x, 0, this._dx(dt)); }
-      if (FC.input.directions.includes("Right")) { this.x = FC.lib.approach(this.x, FC.view.getWidth() - this.width, this._dx(dt)); }
+    if (dt > 14) { // Rate limit updates to 14ms per update or max. 71 fps
+
+      if (input.directions.includes("Up"))    { this.y = lib.approach(this.y, 0, this._dy(dt)); }
+      if (input.directions.includes("Down"))  { this.y = lib.approach(this.y, view.getHeight() - this.height, this._dy(dt)); }
+      if (input.directions.includes("Left"))  { this.x = lib.approach(this.x, 0, this._dx(dt)); }
+      if (input.directions.includes("Right")) { this.x = lib.approach(this.x, view.getWidth() - this.width, this._dx(dt)); }
 
 
       let mouseAngle = undefined;
 
-      if (FC.input.mode === 'mouse' || (FC.input.mouseMoved && !FC.input.directions.length)) {
+      if (input.mode === 'mouse' || (input.mouseMoved && !input.directions.length)) {
 
-        mouseAngle = FC.lib.getAngle(
+        mouseAngle = lib.getAngle(
           this.x + this.hw,
-          this.y + this.hh, 
-          FC.input.mouseX - FC.view.getX(),
-          FC.input.mouseY - FC.view.getY()
+          this.y + this.hh,
+          input.mouseX - view.getX(),
+          input.mouseY - view.getY()
         );
 
-        if (FC.input.mouseMoved) {
+        if (input.mouseMoved) {
 
-          FC.input.mode = 'mouse';
+          input.mode = 'mouse';
 
-          //console.log('Mouse Moved: mouseAngle =', mouseAngle);
+          //this.game.log('Mouse Moved: mouseAngle =', mouseAngle);
 
-          if (mouseAngle >  345 || mouseAngle < 15  ) { FC.input.direction = 'Right';     } else
-          if (mouseAngle >= 15  && mouseAngle <= 75 ) { FC.input.direction = 'UpRight';   } else
-          if (mouseAngle >  75  && mouseAngle <  105) { FC.input.direction = 'Up';        } else
-          if (mouseAngle >= 105 && mouseAngle <= 165) { FC.input.direction = 'UpLeft';    } else
-          if (mouseAngle >  165 && mouseAngle <  195) { FC.input.direction = 'Left';      } else
-          if (mouseAngle >= 195 && mouseAngle <= 255) { FC.input.direction = 'DownLeft';  } else
-          if (mouseAngle >  255 && mouseAngle <  285) { FC.input.direction = 'Down';      } else
-          if (mouseAngle => 285 && mouseAngle <= 345) { FC.input.direction = 'DownRight'; }
+          if (mouseAngle >  345 || mouseAngle < 15  ) { input.direction = 'Right';     } else
+          if (mouseAngle >= 15  && mouseAngle <= 75 ) { input.direction = 'UpRight';   } else
+          if (mouseAngle >  75  && mouseAngle <  105) { input.direction = 'Up';        } else
+          if (mouseAngle >= 105 && mouseAngle <= 165) { input.direction = 'UpLeft';    } else
+          if (mouseAngle >  165 && mouseAngle <  195) { input.direction = 'Left';      } else
+          if (mouseAngle >= 195 && mouseAngle <= 255) { input.direction = 'DownLeft';  } else
+          if (mouseAngle >  255 && mouseAngle <  285) { input.direction = 'Down';      } else
+          if (mouseAngle => 285 && mouseAngle <= 345) { input.direction = 'DownRight'; }
 
-          if (FC.input.direction !== FC.input.lastDirection) { FC.input.directionChanged = true; }
+          if (input.direction !== input.lastDirection) { input.directionChanged = true; }
 
         }
 
       }
 
-      if (this.animator && (FC.input.directionChanged || this.stateChanged)) {
+      if (this.animator && (input.directionChanged || this.stateChanged)) {
 
-        this.animator.currentAnimation = this.animator.getAnimationFacing(FC.input.direction, this.state);
+        this.animator.currentAnimation = this.animator.getAnimationFacing(input.direction, this.state);
         this.facingAngle = this.animator.currentAnimation.dir;
 
       }
 
-      if (FC.input.directionChanged || FC.input.mouseMoved) {
+      if (input.directionChanged || input.mouseMoved) {
 
-        FC.input.keyDirectionView.innerText = 'Facing: ' + FC.input.direction + 
-          ', ' + this.facingAngle + ', ' + (mouseAngle|0);
+        this.game.updateDebugView('direction', 'Facing: ' + input.direction +
+          ', ' + this.facingAngle + ', ' + (mouseAngle|0));
 
       }
 
-      let action = FC.input.action;
+      let action = input.action;
 
       if (action === 'Attack') {
 
@@ -241,7 +266,7 @@ class Player extends Sprite {
 
     super.update(now); // Render Class + Style
 
-  } // end: player.update
+  } // End: Player.update()
 
 
   afterUpdate(now, dt) {
@@ -249,7 +274,7 @@ class Player extends Sprite {
     this._afterUpdateBullets(now, dt);
     super.afterUpdate(now, dt);
 
-  }
+  } // End: player.afterUpdate()
 
 
   render() {
@@ -257,7 +282,7 @@ class Player extends Sprite {
     super.render();
     this._renderBullets();
 
-  } // end: player.render
+  } // End: player.render()
 
 
-} // end: Player class
+} // End: Player Class
