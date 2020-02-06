@@ -23,7 +23,7 @@ class Entity {
     this.lastState = 'Normal';
     this.stateChanged = false;
 
-    game.log('new Entity()', this.type + ': ' + this.id);
+    game.log('New Entity()', this.type + ': ' + this.id);
 
   }
 

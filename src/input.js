@@ -19,7 +19,7 @@ class InputService {
   constructor(game) {
 
     this.game = game;
-    game.log('new InputService()');
+    game.log('New InputService()');
 
     this.mode = 'kb';
 

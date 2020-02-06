@@ -24,7 +24,7 @@ class Boss extends Npc {
     // Sprite::render() uses the animator if available
     this.animator = new Animator(this);
 
-    this.healthBar = new HealthBar(this.id + '-health-bar', this.game);    
+    this.healthBar = new HealthBar(this.id + '-health-bar', this.game);
 
   }
 

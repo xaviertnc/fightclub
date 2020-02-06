@@ -91,7 +91,7 @@ class Animator {
     this.animationChanged = false;
     this.currentAnimation = null;
 
-    sprite.game.log('new Animator()', sprite.id);
+    sprite.game.log('New Animator()', sprite.id);
 
   }
 

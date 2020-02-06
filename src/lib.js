@@ -15,7 +15,7 @@ class Lib {
   constructor(game) {
 
     this.game = game;
-    game.log('new Lib()');
+    game.log('New Lib()');
 
   }
 
