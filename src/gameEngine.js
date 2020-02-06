@@ -18,33 +18,37 @@ class GameEngine {
 
   constructor(config) {
 
-    this.config = config;
-
     FC.log('');
     FC.log('gameEngine.construct(), config =', config);
 
     this.log = FC.log;
 
+    this.config = config;
+
     this.lib = new Lib(this);
 
-    this.input = new InputService(this);
     this.view = new View('main-view', this);
     this.debugView = new View('debug-pane', this);
+    this.input = new InputService(this);
 
-    this.input.init();
     this.view.init();
     this.debugView.init();
+    this.input.init();
 
-    this.input.mount();
     this.view.mount();
     this.debugView.mount();
+    this.input.mount(document);
+
+    this.score = new Score('main-score', this);
+    this.score.init(this.config.score);
+    this.score.build().mount(this.view.elm);
 
     this.stopBtn = document.getElementById('stop');
     this.startBtn = document.getElementById('start');
+    this.restartBtn = document.getElementById('restart');
 
-    // Step gets called by window.requestAnimationFrame() as callback.
-    // Hence, "this === window" but we need it to be === "FC.game"
-    this.step.bind(this);
+    // Step is a timer callback, hence the bind!
+    this.step = this.step.bind(this);
 
     // Shortcut
     this.now = this.lib.getTime;
@@ -56,7 +60,7 @@ class GameEngine {
 
   /**
     * The idea behind init() is to enable us
-    * to "reset" the game.
+    * to "restart" the game.
     *
     */
   init() {
@@ -72,26 +76,22 @@ class GameEngine {
 
     this.log('');
     this.log('gameEngine.init() - Create Game Objects..');
-    this.score = new Score('score', this);
     this.enemy = new Boss('boss1', this);
     this.player = new Player('player', this);
     this.pointer = null;
 
     this.log('');
     this.log('gameEngine.init() - Initialize Game Objects..');
-    this.score.init(this.config.score);
     this.enemy.init(this.config.boss1);
     this.player.init(this.config.player);
 
     this.log('');
     this.log('gameEngine.init() - Build Game Object Views..');
-    this.score.build();
     this.enemy.build();
     this.player.build();
 
     this.log('');
     this.log('gameEngine.init() - Mount Game Object Views..');
-    this.score.mount(this.view.elm);
     this.enemy.mount(this.view.elm);
     this.player.mount(this.view.elm);
 
@@ -99,6 +99,25 @@ class GameEngine {
     this.log('gameEngine.init() - Done,', this);
 
     return this;
+
+  }
+
+
+  dismount() {
+
+    this.enemy.dismount();
+    this.player.dismount();
+    this.player.bullets.forEach(function(bullet) { bullet.dismount(); });
+    if (this.pointer) { this.pointer.dismount(); }
+
+    return this;
+
+  }
+
+
+  restart(startState) {
+
+    this.dismount().init().start(startState);
 
   }
 
@@ -225,7 +244,8 @@ class GameEngine {
 
   updateDebugView(itemID, value) {
 
-    this.debugView.getChildElement(itemID).innerText = value;
+    let elView = this.debugView.getChildElement(itemID);
+    if (elView) { elView.innerText = value; }
 
   }
 

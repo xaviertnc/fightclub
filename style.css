@@ -77,6 +77,11 @@ footer {
   float: right;
 }
 
+.actionbar button {
+  margin-left: 0.67em;
+  padding: 0.3em 0.5em;
+}
+
 .Impacting {
   background-color: crimson;
 }
@@ -91,4 +96,9 @@ footer {
   transform: scaleY(-1);
   filter: flipV;
   -ms-filter: "FlipV";
+}
+
+#restart {
+  background: red;
+  color:white;
 }
