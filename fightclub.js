@@ -16,11 +16,12 @@
  *   - Fixed Pointer SVG Line rendering issue.
  */
 
-console.log('Welcome to Fight Club!');
+FC.log = FC.config.debug ? console.log : function(){};
+
+FC.log('Welcome to Fight Club!');
+
 
 window.onload = function() {
-
-  FC.log = window.console.log && FC.config.debug ? console.log : function(){};
 
   FC.gameEngine = new GameEngine(FC.config);
   FC.gameEngine.init().start('Idle');

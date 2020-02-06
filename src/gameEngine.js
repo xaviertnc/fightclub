@@ -29,19 +29,18 @@ class GameEngine {
 
     this.view = new View('main-view', this);
     this.debugView = new View('debug-pane', this);
+    this.score = new Score('main-score', this);
     this.input = new InputService(this);
 
     this.view.init();
     this.debugView.init();
+    this.score.init(this.config.score);
     this.input.init();
 
     this.view.mount();
-    this.debugView.mount();
-    this.input.mount(document);
-
-    this.score = new Score('main-score', this);
-    this.score.init(this.config.score);
     this.score.build().mount(this.view.elm);
+    this.input.mount(document);
+    this.debugView.mount();
 
     this.stopBtn = document.getElementById('stop');
     this.startBtn = document.getElementById('start');
