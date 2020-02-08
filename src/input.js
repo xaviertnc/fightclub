@@ -5,21 +5,30 @@
  * @author: C. Moller
  * @date: 26 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Rename from Input to InputService
  *   - Add "game" to constructor params
  *   - Add init(), mount() + Refactor
  *   - Totally refactor debug views. Use "updateDebugView"
  *   - Add "debugView" and "rateLimit" shorthand props
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - Refactor constructor(), init(), build() and mount() again.
+ *   - Replace "updateDebugView" with "debugView.mountChild()"
+ *
  */
 
 class InputService {
 
 
-  constructor(game) {
+  constructor() {
 
-    this.game = game;
-    game.log('New InputService()');
+    FC.log('New InputService()');
+
+  }
+
+
+  init(gameEngine) {
 
     this.mode = 'kb';
 
@@ -71,26 +80,27 @@ class InputService {
 
     this.elm = null;
 
+    // Debug views
+    this.elDispInputMode  = null;
+    this.elDispMouseXY    = null;
+    this.elDispMouseDown  = null;
+    this.elDispKeysDown   = null;
+    this.elDispDirections = null;
+    this.elDispDirection  = null;
+
+    // Shortcuts
+    this.log = gameEngine.log;
+    this.rateLimit = gameEngine.lib.rateLimit;
+    this.debugView = gameEngine.debugView;
+
+    gameEngine.log('InputService.init() - Done');
+
   }
 
 
-  init(props) {
+  mount(targetElm) {
 
-    for (let prop in props) { this[prop] = props[prop]; }
-
-    this.debugView = this.game.debugView;
-    this.rateLimit = this.game.lib.rateLimit;
-
-    this.game.log('InputService.init() - Done,', this);
-
-    return this;
-
-  }
-
-
-  mount(elm) {
-
-    this.elm = elm ? elm : document.documentElement;
+    this.elm = targetElm || document;
 
     this.elm.addEventListener('keydown'   , this.onKeyDown.bind(this));
     this.elm.addEventListener('keyup'     , this.onKeyUp.bind(this));
@@ -98,14 +108,16 @@ class InputService {
     this.elm.addEventListener('mousedown' , this.onMouseDown.bind(this));
     this.elm.addEventListener('mousemove' , this.rateLimit(this.onMouseMove.bind(this), this.mouseMoveRate));
 
-    this.debugView.addItem('input_mode');
-    this.debugView.addItem('mouse_xy');
-    this.debugView.addItem('mouse_down');
-    this.debugView.addItem('keys_down');
-    this.debugView.addItem('directions');
-    this.debugView.addItem('direction');
+    this.elDispInputMode  = this.debugView.mountChild('input_mode');
+    this.elDispMouseXY    = this.debugView.mountChild('mouse_xy'  );
+    this.elDispMouseDown  = this.debugView.mountChild('mouse_down');
+    this.elDispKeysDown   = this.debugView.mountChild('keys_down' );
+    this.elDispDirections = this.debugView.mountChild('directions');
+    this.elDispDirection  = this.debugView.mountChild('direction' );
 
-    this.game.log('InputService.mount() - Done');
+    this.log('InputService.mount() Debug View:', this.debugView);
+
+    this.log('InputService.mount() - Done', this);
 
     return this;
 
@@ -114,7 +126,7 @@ class InputService {
 
   onKeyDown(event) {
 
-    //this.game.log('Input.onKeyDown()');
+    //this.log('Input.onKeyDown()');
 
     var keyCode = (event.keyCode ? event.keyCode : event.which);
 
@@ -122,14 +134,14 @@ class InputService {
 
     this.keysChanged = true;
 
-    this.game.updateDebugView('keys_down', 'Keys Down: ' + JSON.stringify(this.keysDown));
+    this.elDispKeysDown.innerText = 'Keys Down: ' + JSON.stringify(this.keysDown);
 
   }
 
 
   onKeyUp(event) {
 
-    //this.game.log('Input.onKeyUp()');
+    //this.log('Input.onKeyUp()');
 
     var keyCode = (event.keyCode ? event.keyCode : event.which);
 
@@ -137,7 +149,7 @@ class InputService {
 
     this.keysChanged = true;
 
-    this.game.updateDebugView('keys_down', 'Keys Down: ' + JSON.stringify(this.keysDown));
+    this.elDispKeysDown.innerText = 'Keys Down: ' + JSON.stringify(this.keysDown);
 
   }
 
@@ -146,14 +158,14 @@ class InputService {
 
     this.mode = 'mouse';
     this.leftMouseDown = true;
-    this.game.updateDebugView('mouse_down', 'Mouse Down: true');
+    this.elDispMouseDown.innerText = 'Mouse Down: true';
   }
 
 
   onMouseUp(event) {
 
     this.leftMouseDown = false;
-    this.game.updateDebugView('mouse_down', 'Mouse Down:');
+    this.elDispMouseDown.innerText = 'Mouse Down:';
 
   }
 
@@ -170,7 +182,7 @@ class InputService {
 
     this.mouseMoved = true;
 
-    this.game.updateDebugView('mouse_xy', 'MouseX: ' + this.mouseX + ', MouseY: ' + this.mouseY);
+    this.elDispMouseXY.innerText = 'MouseX: ' + this.mouseX + ', MouseY: ' + this.mouseY;
 
   }
 
@@ -276,13 +288,13 @@ class InputService {
 
         this.mode = 'kb';
         this.directionChanged = true;
-        this.game.updateDebugView('direction', 'Direction: ' + this.direction);
+        this.elDispDirection.innerText = 'Direction: ' + this.direction;
 
-        //this.game.log('INPUT UPD: Dir Changed! dir =', this.direction, ', lastDir =', this.lastDirection);
+        //this.log('INPUT UPD: Dir Changed! dir =', this.direction, ', lastDir =', this.lastDirection);
 
       }
 
-      this.game.updateDebugView('directions', 'Directions: ' + JSON.stringify(this.directions));
+      this.elDispDirections.innerText = 'Directions: ' + JSON.stringify(this.directions);
 
     }
 
@@ -300,7 +312,7 @@ class InputService {
 
     }
 
-    this.game.updateDebugView('input_mode', 'Input Mode: ' + this.mode);
+    this.elDispInputMode.innerText = 'Input Mode: ' + this.mode;
 
   } // End: Input::update()
 

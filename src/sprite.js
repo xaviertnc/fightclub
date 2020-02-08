@@ -5,72 +5,109 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Add game + type to constructor params
  *   - Add build(), mount(), dismount() + Refactor
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - Refactor again
+ *   - Change var and method names. Remove underscores.
+ *   - Improve mount() + Add mountChild()
+ *   - Check for "value changed"
+ *   - Add updateElementContent()
  */
 
 class Sprite extends Entity {
 
 
-  constructor(id, game, type) {
+  constructor(id, parent, props) {
 
-    super(id, game, type);
+    super(id, parent);
 
     this.x = 0;
     this.y = 0;
     this.bgTop = 0;
     this.bgLeft = 0;
-    this.width = 16;
-    this.height = 16;
+    this.width = 0;
+    this.height = 0;
     this.speed = 0;
     this.horzSpeed = 0;        // pixels per second
     this.vertSpeed = 0;        // pixels per second
     this.lastMoveTime = 0;     // unix time
     this.lastUpdateTime = 0;   // unix time
     this.classUpdated = false;
-    this.styleUpdated = false;
-    this.firstRender = true;
-    this.styleParams = {};
+    this.styleDataUpdated = false;
+    this.styleData = {};
     this.className = '';
     this.mounted = false;
     this.tagName = 'div';
     this.elm = null;
 
+    if (props) { this.init(props); }
+
   }
 
 
-  build(elm) {
+  build() {
 
-    if (elm) { this.elm = elm; }
-    else { this.elm = document.createElement(this.tagName || 'div'); }
-    this.game.log('Sprite.build()', this.type + ': ' + this.id, '- Done,', this.elm);
+    this.elm = document.createElement(this.tagName || 'div');
+
+    this.elm.id = this.id;
+
+    this.log(this.type + '.build():', this.id, '- Done,', this.elm);
+
     return this;
 
   }
 
 
-  mount(parentElm) {
+  mountChild(id, elm) {
+
+    if ( ! elm) {
+      elm = document.createElement('div');
+      elm.id = id;
+    }
+
+    this.addChild(elm);
+
+    this.elm.appendChild(elm); // i.e. mount!
+
+    return elm;
+
+  }
+
+
+  mount(parentElm, props) {
 
     if ( ! parentElm) {
+
       this.elm = document.getElementById(this.id);
+
       if (this.elm) {
+
+        if (props) { this.init(props); }
+
         this.mounted = true;
-        this.game.log('Sprite.mount()', this.type + ': ' + this.id, '- Element already mounted!', this.elm);
+
+        this.log(this.type + '.mount():', this.id, '- Element already mounted!', this.elm);
+
         return this;
+
       }
-      parentElm = document.body;
+
+      parentElm = this.engine.view.elm;
+
     }
 
-    if ( ! this.elm) {
-      this.elm = document.createElement(this.tagName || 'div');
-    }
+    if ( ! this.elm) { this.build(); }
 
     parentElm.appendChild(this.elm);
 
+    if (props) { this.init(props); }
+
     this.mounted = true;
 
-    this.game.log('Sprite.mount()', this.type + ': ' + this.id, '- Done, parentElm =', parentElm);
+    this.log(this.type + '.mount():', this.id, '- Done, parentElm =', parentElm);
 
     return this;
 
@@ -90,22 +127,12 @@ class Sprite extends Entity {
 
   render() {
 
-    if (this.firstRender) {
-
-      this._renderClass();
-      this._renderStyle();
-
-      this.firstRender = false;
-
-    } else {
-
-      if (this.stateChanged || this.classUpdated) { this._renderClass(); }
-      if (this.styleUpdated) { this._renderStyle(); }
-
-    }
+    if (this.valueChanged) { this.updateElementContent(); }
+    if (this.stateChanged || this.classUpdated) { this.updateElementClass(); }
+    if (this.styleDataUpdated) { this.updateElementStyle(); }
 
     this.classUpdated = false;
-    this.styleUpdated = false;
+    this.styleDataUpdated = false;
 
   }
 
@@ -137,7 +164,7 @@ class Sprite extends Entity {
 
           this.classUpdated = true;
 
-          //this.game.log('frame.flipH =', frame.flipH, ', sprite.id:', this.id,
+          //this.log('frame.flipH =', frame.flipH, ', sprite.id:', this.id,
           //  ', sprite.className:', this.className);
 
         }
@@ -146,32 +173,16 @@ class Sprite extends Entity {
 
     }
 
-    this._updateStyle();
+    this.updateElementStyleData();
 
   }
 
 
-  _styleNeedsUpdate() {
+  updateElementStyleData() {
 
-    let sp = this.styleParams;
+    if (this.styleDataNeedsUpdate()) {
 
-    return (
-      sp.x      !== this.x     ||
-      sp.y      !== this.y     ||
-      sp.width  !== this.width ||
-      sp.bgTop  !== this.bgTop ||
-      sp.bgLeft !== this.bgLeft
-
-    );
-
-  }
-
-
-  _updateStyle() {
-
-    if (this._styleNeedsUpdate()) {
-
-      this.styleParams = {
+      this.styleData = {
         x      : this.x,
         y      : this.y,
         width  : this.width,
@@ -181,21 +192,37 @@ class Sprite extends Entity {
         height : this.height
       };
 
-      this.styleUpdated = true;
+      this.styleDataUpdated = true;
 
     }
 
   }
 
 
-  _renderClass() {
+  styleDataNeedsUpdate() {
 
-    this.elm.className = this.className + ' ' + this.state;
+    let styleData = this.styleData;
+
+    return (
+      styleData.x      !== this.x     ||
+      styleData.y      !== this.y     ||
+      styleData.width  !== this.width ||
+      styleData.bgTop  !== this.bgTop ||
+      styleData.bgLeft !== this.bgLeft
+
+    );
 
   }
 
 
-  _renderStyle() {
+  updateElementContent(content) {
+
+    this.elm.innerHTML = content || this.value;
+
+  }
+
+
+  updateElementStyle() {
 
     let styleStr = 'left:' + this.x + 'px;top:' + this.y + 'px;'
       + 'height:' + this.height + 'px;width:'  + this.width  + 'px;';
@@ -207,6 +234,13 @@ class Sprite extends Entity {
     }
 
     this.elm.style = styleStr;
+
+  }
+
+
+  updateElementClass() {
+
+    this.elm.className = this.className + ' ' + this.state;
 
   }
 

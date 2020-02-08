@@ -1,4 +1,4 @@
-# Fight Club v0.6
+# Fight Club v0.7
 
 ## Vanilla JS game engine demo
 

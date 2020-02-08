@@ -5,19 +5,25 @@
  * @author: C. Moller
  * @date: 29 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Now extends Sprite
  *   - Add init(), build() + Refactor
  *   - Fix SVG Line rendering issue!
  *   - Add elSvg + elSvgLine
  *   - Rename x1, y1 to x, y
  *   - Rename x2, y2 to ex, ey
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - New constructor structure
+ *
  */
 
 class PointerLine extends Sprite {
 
 
-  init(props) {
+  constructor(id, parent, props) {
+
+    super(id, parent);
 
     this.ex = 0;
     this.ey = 0;
@@ -25,17 +31,17 @@ class PointerLine extends Sprite {
     this.elSvgLine = null;
     this.elSvg = null;
 
-    return super.init(props);
+    if (props) { this.init(props); }
 
   }
 
 
-  build(elm) {
+  build() {
 
-    let vw = this.game.view.getWidth();
-    let vh = this.game.view.getHeight();
+    super.build();
 
-    this.elm = elm || document.createElement('div');
+    const vw = this.engine.view.getWidth();
+    const vh = this.engine.view.getHeight();
 
     this.elSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.elSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -56,8 +62,6 @@ class PointerLine extends Sprite {
 
     this.elm.className = 'pointer-line';
 
-    this.game.log('PointerLine.build(),', this.elm);
-
     return this;
 
   }
@@ -65,7 +69,7 @@ class PointerLine extends Sprite {
 
   render() {
 
-    if (this.game.input.mode === 'mouse') {
+    if (this.engine.input.mode === 'mouse') {
 
       this.elm.style.opacity = 0.5;
 
@@ -85,16 +89,21 @@ class PointerLine extends Sprite {
 
   update(now) {
 
-    if (this.game.input.mode === 'mouse') {
+    const lib = this.engine.lib;
+    const view = this.engine.view;
+    const input = this.engine.input;
+    const player = this.engine.player;
 
-      this.x = this.game.player.x + 15;
-      this.y = this.game.player.y + 30;
+    if (input.mode === 'mouse') {
 
-      let angleRad = this.game.lib.getAngleRad(
+      this.x = player.x + 15;
+      this.y = player.y + 30;
+
+      const angleRad = lib.getAngleRad(
         this.x,
         this.y,
-        this.game.input.mouseX - this.game.view.getX(),
-        this.game.input.mouseY - this.game.view.getY()
+        input.mouseX - view.getX(),
+        input.mouseY - view.getY()
       );
 
       this.ex = this.x + Math.cos(angleRad) * this.length;

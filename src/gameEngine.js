@@ -5,12 +5,17 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Add lots of debug logs + Organize code.
  *   - Internalize log, lib, input, view and debugView.
  *   - Solve initial game.start/stop requirement issue.
  *   - Implement initialization stages: Create, Init, Build, Mount
  *   - Add init() + updateDebugView()
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - Refactor constructor() + init() again.
+ *   - Add / move / improve debug logs.
+ *
  */
 
 class GameEngine {
@@ -19,40 +24,44 @@ class GameEngine {
   constructor(config) {
 
     FC.log('');
-    FC.log('gameEngine.construct(), config =', config);
+    FC.log('Construct Game Engine - Start, config =', config);
+    FC.log('------------------------------');
 
     this.log = FC.log;
 
     this.config = config;
 
-    this.lib = new Lib(this);
+    this.lib = new Lib();
 
+    this.now = this.lib.getTime; // Shortcut
+
+    this.step = this.step.bind(this); // reqAnimFrame Callback
+
+    FC.log('');
     this.view = new View('main-view', this);
-    this.debugView = new View('debug-pane', this);
-    this.score = new Score('main-score', this);
-    this.input = new InputService(this);
-
-    this.view.init();
-    this.debugView.init();
-    this.score.init(this.config.score);
-    this.input.init();
-
     this.view.mount();
-    this.score.build().mount(this.view.elm);
-    this.input.mount(document);
+
+    FC.log('');
+    this.debugView = new View('debug-pane', this);
     this.debugView.mount();
 
+    FC.log('');
+    this.score = new Score('main-score', this);
+    this.score.init(this.config.score);
+    this.score.mount(this.view.elm);
+
+    FC.log('');
+    this.input = new InputService(this);
+    this.input.init(this);
+    this.input.mount();
+
+    FC.log('');
     this.stopBtn = document.getElementById('stop');
     this.startBtn = document.getElementById('start');
     this.restartBtn = document.getElementById('restart');
 
-    // Step is a timer callback, hence the bind!
-    this.step = this.step.bind(this);
-
-    // Shortcut
-    this.now = this.lib.getTime;
-
-    FC.log('gameEngine.construct() - Done');
+    FC.log('------------------------------');
+    FC.log('Construct Game Engine - Done');
 
   }
 
@@ -65,7 +74,9 @@ class GameEngine {
   init() {
 
     this.log('');
-    this.log('gameEngine.init() - Start');
+    this.log('');
+    this.log('Add Dynamic Objects - Start');
+    this.log('------------------------------');
 
     this.nextId = 0;
     this.lastTime = 0;
@@ -74,28 +85,29 @@ class GameEngine {
     this.state = 'Idle';
 
     this.log('');
-    this.log('gameEngine.init() - Create Game Objects..');
+    this.log('gameEngine.init() - CREATE OBJECTS');
     this.enemy = new Boss('boss1', this);
-    this.player = new Player('player', this);
+    this.player = new Player('player1', this);
     this.pointer = null;
 
     this.log('');
-    this.log('gameEngine.init() - Initialize Game Objects..');
+    this.log('gameEngine.init() - INIT OBJECTS');
     this.enemy.init(this.config.boss1);
-    this.player.init(this.config.player);
+    this.player.init(this.config.player1);
 
     this.log('');
-    this.log('gameEngine.init() - Build Game Object Views..');
+    this.log('gameEngine.init() - BUILD VIEWS');
     this.enemy.build();
     this.player.build();
 
     this.log('');
-    this.log('gameEngine.init() - Mount Game Object Views..');
+    this.log('gameEngine.init() - MOUNT VIEWS');
     this.enemy.mount(this.view.elm);
     this.player.mount(this.view.elm);
 
     this.log('');
-    this.log('gameEngine.init() - Done,', this);
+    this.log('----------------------');
+    this.log('Add Dynamic Objects - Done,', this);
 
     return this;
 
@@ -124,7 +136,7 @@ class GameEngine {
   start(startState) {
 
     this.log('');
-    this.log('gameEngine.start()');
+    this.log('game.start()');
 
     this.state = startState || 'Running';
 
@@ -147,7 +159,7 @@ class GameEngine {
   stop() {
 
     this.log('');
-    this.log('gameEngine.stop()');
+    this.log('game.stop()');
 
     window.clearTimeout(this.stepTimer);
 

@@ -5,17 +5,22 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Add constructor + game param
  *   - Log on construct
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - Change game.log() to FC.log()
+ *   - Remove "game" from contructor
+ *
  */
 
 class Lib {
 
-  constructor(game) {
+  constructor() {
 
-    this.game = game;
-    game.log('New Lib()');
+    FC.log('');
+    FC.log('New Lib()');
 
   }
 
@@ -60,7 +65,7 @@ class Lib {
 
     let dV = val - limit;
 
-    //this.game.log('Approach val:', val, ', limit:', limit, ', inc:', increment, ', dV:', dV);
+    //FC.log('Approach val:', val, ', limit:', limit, ', inc:', increment, ', dV:', dV);
 
     if (dV > 0) {
 

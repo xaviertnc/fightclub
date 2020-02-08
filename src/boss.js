@@ -5,26 +5,31 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Add game + type to constructor params
  *   - Add init(), build(), mount() + Refactor
  *   - Put Heatlh Bar inside Boss element
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - Refactor constructor(), init(), build() and mount()
+ *   - Add approach() shortcut
+ *
  */
 
 class Boss extends Npc {
 
 
-  constructor(id, game, type) {
+  constructor(id, parent, props) {
 
-    super(id, game, type);
+    super(id, parent);
 
     this.health = 100;
     this.className = 'boss1';
+    this.healthBar = null;
 
-    // Sprite::render() uses the animator if available
-    this.animator = new Animator(this);
+    if (props) { this.init(props); }
 
-    this.healthBar = new HealthBar(this.id + '-health-bar', this.game);
+    this.approach = this.engine.lib.approach;
 
   }
 
@@ -33,40 +38,38 @@ class Boss extends Npc {
 
     super.init(props);
 
-    this.animator.init({
-      startFacing: this.startFacing,
-      initialState: this.initialState
+    // Used in Sprite::render() if available
+    this.animator = new Animator(this, {
+      initialDirection: this.facing,
+      initialState: this.state
     });
 
-    this.healthBar.init({ y: -15, width: this.width, height: 10 });
+    const hbId = this.id + '-health-bar';
+
+    this.healthBar = new HealthBar(hbId, this, {
+      y: -15,
+      width: this.width,
+      height: 10
+    });
 
     return this;
 
   }
 
 
-  build(elm) {
+  build() {
 
-    super.build(elm);
-    this.healthBar.build();
-    this.game.log('Boss.build(),', this.id, '- Done');
+    super.build();
+    this.healthBar.build().mount(this.elm);
+
     return this;
-
-  }
-
-
-  mount(parentElm) {
-
-    super.mount(parentElm);
-    this.healthBar.mount(this.elm);
-    return this.elm;
 
   }
 
 
   takeHit(objOther) {
 
-    this.health = this.game.lib.approach(this.health, 0, objOther.healthDamage || 1);
+    this.health = this.approach(this.health, 0, objOther.healthDamage || 1);
     this.healthBar.state = this.health;
 
   }

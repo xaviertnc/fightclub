@@ -4,11 +4,17 @@
  * @author: C. Moller
  * @date: 26 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Rename top-level keys "animation" + "animationsCfg"
  *   - Move x,y,height,width,vertSpeed,.. settings to config
  *   - Add "debug" setting to control game.log()
  *   - Add "Score" section
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - Add className:'score' + value:0 to score
+ *   - Change initialState to state
+ *   - Change startFacing to facing
+ *
  */
 
 FC.config = {
@@ -17,16 +23,20 @@ FC.config = {
 
   score: {
 
+    className: 'score',
+
     x: 10,
     y: 10,
 
     height: 30,
-    width: 270
+    width: 270,
+
+    value: 0,
 
   },
 
 
-  player: {
+  player1: {
 
     x: 150,
     y: 250,
@@ -34,8 +44,8 @@ FC.config = {
     vertSpeed: 30,
     horzSpeed: 30,
 
-    initialState: 'Normal',
-    startFacing: 'Right',
+    state: 'Normal',
+    facing: 'Right',
 
     animation: {
 
@@ -222,8 +232,8 @@ FC.config = {
     vertSpeed: 30,
     horzSpeed: 30,
 
-    initialState: 'Normal',
-    startFacing: 'Left',
+    state: 'Normal',
+    facing: 'Left',
 
     animation: {
 

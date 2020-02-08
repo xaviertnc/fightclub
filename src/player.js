@@ -5,30 +5,35 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Add game + type to constructor params
  *   - Add init() + Refactor
  *   - Refactor bullet init code.
  *   - Use updateDebugView()
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - New constructor structure
+ *   - Add mount()
+ *   - Revert using updateDebugView()
+ *
  */
 
 class Player extends Sprite {
 
 
-  constructor(id, game, type) {
+  constructor(id, parent, props) {
 
-    super(id, game, type);
+    super(id, parent);
 
-    this.bullets = [];
-    this.lastAttack = 0;
-    this.maxFireRate = 100; // ms per shot
-    this.className = 'wizzard';
-    this.facingAngle = 0;
     this.hw = 0;
     this.hh = 0;
+    this.lastAttack = 0;
+    this.facingAngle = 0;
+    this.maxFireRate = 100; // ms per shot
+    this.className = 'wizzard';
+    this.bullets = [];
 
-    // Sprite::render() uses the animator if available
-    this.animator = new Animator(this);
+    if (props) { this.init(props); }
 
   }
 
@@ -40,10 +45,25 @@ class Player extends Sprite {
     this.hw = (this.width / 2)|0;
     this.hh = (this.height / 2)|0;
 
-    this.animator.init({
-      startFacing: this.startFacing,
-      initialState: this.initialState
+    // Used in Sprite::render() if available
+    this.animator = new Animator(this, {
+      initialDirection: this.facing,
+      initialState: this.state
     });
+
+    // debug
+    this.elDispFacingAngle = null;
+
+    return this;
+
+  }
+
+
+  mount(parentElm, props) {
+
+    super.mount(parentElm, props);
+
+    this.elDispFacingAngle = this.engine.debugView.mountChild('facing_angle');
 
     return this;
 
@@ -113,9 +133,7 @@ class Player extends Sprite {
             break;
         }
 
-        let bullet = new PlayerBullet('pb'+(this.game.nextId++), this.game);
-
-        bullet.init({
+        let bullet = new PlayerBullet('pb'+(this.engine.nextId++), this, {
             state: 'Live',
             x: bulletX,
             y: bulletY,
@@ -126,7 +144,7 @@ class Player extends Sprite {
             angle: bulletAngle
         });
 
-        bullet.mount(this.game.view.elm);
+        bullet.mount(this.engine.view.elm);
 
         this.bullets.push(bullet);
 
@@ -137,7 +155,7 @@ class Player extends Sprite {
 
   _updateBullets(now, dt) {
 
-    let game = this.game;
+    let game = this.engine;
 
     // Update LIVE bullets
     this.bullets.forEach(function(bullet) {
@@ -191,9 +209,9 @@ class Player extends Sprite {
 
   update(now, dt) {
 
-    let lib = this.game.lib;
-    let view = this.game.view;
-    let input = this.game.input;
+    let lib = this.engine.lib;
+    let view = this.engine.view;
+    let input = this.engine.input;
 
     if (dt > 14) { // Rate limit updates to 14ms per update or max. 71 fps
 
@@ -218,7 +236,7 @@ class Player extends Sprite {
 
           input.mode = 'mouse';
 
-          //this.game.log('Mouse Moved: mouseAngle =', mouseAngle);
+          //this.log('Mouse Moved: mouseAngle =', mouseAngle);
 
           if (mouseAngle >  345 || mouseAngle < 15  ) { input.direction = 'Right';     } else
           if (mouseAngle >= 15  && mouseAngle <= 75 ) { input.direction = 'UpRight';   } else
@@ -244,8 +262,8 @@ class Player extends Sprite {
 
       if (input.directionChanged || input.mouseMoved) {
 
-        this.game.updateDebugView('direction', 'Facing: ' + input.direction +
-          ', ' + this.facingAngle + ', ' + (mouseAngle|0));
+        this.elDispFacingAngle.innerText = 'Facing: ' + input.direction +
+          ', ' + this.facingAngle + ', ' + (mouseAngle|0);
 
       }
 

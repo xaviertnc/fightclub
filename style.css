@@ -18,6 +18,18 @@ footer {
   max-height: 100vw;
 }
 
+#main-score {
+  font-size: 2em;
+  padding: 0.3em;
+  color: burlywood;
+  font-weight: bold;
+}
+
+#restart {
+  background: red;
+  color:white;
+}
+
 .title {
   position: absolute;
   top: 0;
@@ -37,13 +49,6 @@ footer {
   background: url('img/gringe/gringe_spr.png') no-repeat;
   position: absolute;
   z-index: 100;
-}
-
-.score {
-  font-size: 2em;
-  padding: 0.3em;
-	color: burlywood;
-	font-weight: bold;
 }
 
 .health-bar {
@@ -96,9 +101,4 @@ footer {
   transform: scaleY(-1);
   filter: flipV;
   -ms-filter: "FlipV";
-}
-
-#restart {
-  background: red;
-  color:white;
 }

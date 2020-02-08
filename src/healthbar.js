@@ -5,29 +5,34 @@
  * @author: C. Moller
  * @date: 20 December 2017
  *
- * @updated: 05 Feb 2020 (C. Moller)
+ * @update: C. Moller - 05 Feb 2020
  *   - Add init(), build() + Refactor
+ *
+ * @update: C. Moller - 08 Feb 2020
+ *   - Refactor constructor()
+ *   - Add updateElementContent()
+ *
  */
 
 class HealthBar extends Sprite {
 
 
-  init(props) {
+  constructor(id, parent, props) {
 
-    super.init(props);
+    super(id, parent);
 
     this.state = 100;
     this.className = 'health-bar';
     this.elBarInner = null;
 
-    return this;
+    if (props) { this.init(props); }
 
   }
 
 
   build(elm) {
 
-    this.elm = document.createElement('div');
+    super.build();
 
     this.elBarInner = document.createElement('small');
     this.elBarInner.className = 'health-bar-inner';
@@ -35,11 +40,17 @@ class HealthBar extends Sprite {
 
     this.elm.appendChild(this.elBarInner);
 
-    this.game.log('HealthBar.build(),', this.id, '- Done,', this.elm);
-
     return this;
 
   }
+
+
+  updateElementContent(content) {
+
+    super.updateElementContent('Score: ' + this.value);
+
+  }
+
 
 
   render(now) {
@@ -57,4 +68,5 @@ class HealthBar extends Sprite {
 
 
 } // End: HealthBar Class
+
 
